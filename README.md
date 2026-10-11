@@ -44,6 +44,17 @@ Experimental. Tested with Home Assistant Green and a Samsung The Frame
 43-inch (2019). Other Frame models and years are not tested yet; Samsung has
 changed Art Mode on newer models.
 
+## Plans
+
+- Test a newer Samsung The Frame. I have a second, newer Frame at home.
+- Try LG OLED Gallery TVs. OLED can burn in from static pictures, so this
+  needs more than a new picture every 15 minutes: small shifts of the layout,
+  changing backgrounds and a darker image.
+- Make the update interval a setting, if people ask for it.
+
+If you test it on another TV, please open an issue and tell me the model and
+year, even if it works.
+
 ## Installation
 
 ### HACS (custom repository)
