@@ -20,3 +20,5 @@ ENTITY_DEFAULTS = {
     "weather": "weather.home",
 }
 DEFAULTS = {**PATH_DEFAULTS, **ENTITY_DEFAULTS}
+# Car sensors may be left empty: an empty first/second car is not drawn.
+CAR_KEYS = ("tesla", "tesla_power", "hyundai", "hyundai_power")

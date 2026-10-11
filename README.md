@@ -115,6 +115,10 @@ Everything can be changed later with **Configure** on the integration.
 | Car names and monograms | `Tesla`, `T` | any text, 1–2 letters |
 | Text under the weather | `Local weather` | for example your village |
 
+**One car or no car:** leave the second car's sensors empty and its column is
+not drawn; the rest of the row is centred. Leave both empty if you have no
+electric car.
+
 Missing or wrong values show a dash instead of breaking the picture. Values
 are shown as Home Assistant has them; the integration does not check how
 fresh they are.

@@ -61,7 +61,8 @@ async def async_setup_entry(hass, entry):
                 _LOGGER.warning("Forecast unavailable: %s", exc)
             try:
                 labels = {key: config.get(key) for key in LABEL_DEFAULTS}
-                await hass.async_add_executor_job(render, config["background_path"], config["output_path"], snapshot, forecast, now, labels)
+                cars = [key for key in ("tesla", "hyundai") if config.get(key)]  # empty field = no such car
+                await hass.async_add_executor_job(render, config["background_path"], config["output_path"], snapshot, forecast, now, labels, cars)
                 runtime["last_generated"] = dt_util.utcnow()
                 runtime["error"] = None
                 async_dispatcher_send(hass, f"{DOMAIN}_updated")

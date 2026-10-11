@@ -39,6 +39,24 @@ class RendererTests(unittest.TestCase):
                             {"vehicle1_name": "Volkswagen ID.Buzz Long Range", "vehicle1_letter": "V", "location_name": ""})
             self.assertTrue(output.is_file())
 
+    def test_two_cars_keep_original_layout(self):
+        self.assertEqual(renderer.column_positions(5), [710, 990, 1270, 1540, 1800])
+
+    def test_fewer_columns_are_centred_and_inside_frame(self):
+        for count in (3, 4):
+            xs = renderer.column_positions(count)
+            self.assertAlmostEqual((xs[0] + xs[-1]) / 2, renderer.COLUMN_CENTRE, delta=1)
+            self.assertLessEqual(xs[-1] + renderer.column_width(xs[-1]) / 2, renderer.RIGHT_EDGE)
+
+    def test_one_car_and_no_car_render(self):
+        snapshot = {"tesla": {"state": "64"}, "hyundai": {"state": "81"}}
+        with tempfile.TemporaryDirectory() as tmp:
+            for cars in (["tesla"], ["hyundai"], []):
+                output = Path(tmp) / f"art_{len(cars)}.jpg"
+                renderer.render(ROOT / "assets/tuscan_background.jpg", output, snapshot, [],
+                                datetime(2026, 1, 1, tzinfo=timezone.utc), cars=cars)
+                self.assertTrue(output.is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

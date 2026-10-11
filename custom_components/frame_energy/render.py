@@ -90,8 +90,24 @@ def column_width(x, width=245):
     """Keep centred text inside the frame: never wider than twice the gap to the edge."""
     return min(width, 2 * (RIGHT_EDGE - x))
 
-def render(background, output, snapshot, forecast, now, labels=None):
+CARS = (("tesla", "vehicle1", 68), ("hyundai", "vehicle2", 52))  # key, label prefix, monogram size
+FIVE_COLUMNS = [710, 990, 1270, 1540, 1800]  # the original layout with two cars
+COLUMN_GAP = 280
+COLUMN_CENTRE = 1255  # middle of the original row
+
+
+def column_positions(count):
+    """Two cars keep the original layout; with fewer cars the row is centred."""
+    if count == len(FIVE_COLUMNS):
+        return list(FIVE_COLUMNS)
+    first = COLUMN_CENTRE - COLUMN_GAP * (count - 1) / 2
+    return [round(first + COLUMN_GAP * i) for i in range(count)]
+
+
+def render(background, output, snapshot, forecast, now, labels=None, cars=None):
+    """``cars`` lists the enabled car keys ("tesla", "hyundai"); None means both."""
     labels = {**LABEL_DEFAULTS, **{k: v for k, v in (labels or {}).items() if v}}
+    enabled = [car for car in CARS if cars is None or car[0] in cars]
     with Image.open(background) as source:
         im = ImageOps.fit(source.convert("RGB"), (1920,1080), method=Image.Resampling.LANCZOS)
     d = ImageDraw.Draw(im)
@@ -101,24 +117,28 @@ def render(background, output, snapshot, forecast, now, labels=None):
             size-=1
         d.text((x,y),str(value),font=load_font(size),fill=fill,anchor=anchor)
     text(75,204,f"{now:%A}, {now.day} {now:%B %Y}",29,"lt",max_width=485)
-    columns=[(710,"Solar generation","solar"),(990,"Home consumption","home"),(1270,"Home battery","battery"),(1540,labels["vehicle1_name"],"tesla"),(1800,labels["vehicle2_name"],"hyundai")]
+    names=[("Solar generation","solar"),("Home consumption","home"),("Home battery","battery")]
+    names+=[(labels[f"{prefix}_name"],key) for key,prefix,_ in enabled]
+    xs=column_positions(len(names))
+    columns=[(x,label,key) for x,(label,key) in zip(xs,names)]
+    sx,hx,bx=xs[:3]
     # Simple icons are drawn by code so their meaning never changes with data.
-    draw_weather(d,710,110,"sunny",1.15)
-    d.polygon([(958,113),(990,82),(1022,113),(1013,113),(1013,147),(967,147),(967,113)],fill=INK)
-    d.rectangle((983,123,996,147),fill="#e7d5b3")
-    d.rounded_rectangle((1250,82,1290,147),radius=4,outline=INK,width=4)
-    d.rectangle((1263,75,1277,81),fill=INK)
+    draw_weather(d,sx,110,"sunny",1.15)
+    d.polygon([(hx-32,113),(hx,82),(hx+32,113),(hx+23,113),(hx+23,147),(hx-23,147),(hx-23,113)],fill=INK)
+    d.rectangle((hx-7,123,hx+6,147),fill="#e7d5b3")
+    d.rounded_rectangle((bx-20,82,bx+20,147),radius=4,outline=INK,width=4)
+    d.rectangle((bx-7,75,bx+7,81),fill=INK)
     b=numeric(snapshot,"battery")
     if b is not None:
-        d.rectangle((1256,141-int(53*b/100),1284,141),fill=GREEN)
+        d.rectangle((bx-14,141-int(53*b/100),bx+14,141),fill=GREEN)
     # Monograms instead of brand logos: recognisable, but the picture stays a painting.
-    text(1540,112,labels["vehicle1_letter"][:2],68)
-    text(1800,112,labels["vehicle2_letter"][:2],52)
+    for x,(key,prefix,size) in zip(xs[3:],enabled):
+        text(x,112,labels[f"{prefix}_letter"][:2],size)
     for index,(x,label,key) in enumerate(columns):
         value=numeric(snapshot,key,power=key in ("solar","home"))
         text(x,207,power_text(value) if key in ("solar","home") else percent_text(value),56,max_width=column_width(x))
         text(x,266,label,25,max_width=column_width(x))
-        if index < 4:
+        if index < len(columns)-1:
             d.line((x+142,85,x+142,306),fill="#b8ad92",width=1)
     charge=numeric(snapshot,"battery_charge",True)
     discharge=numeric(snapshot,"battery_discharge",True)
@@ -130,9 +150,9 @@ def render(background, output, snapshot, forecast, now, labels=None):
         detail=f"Discharging · {power_text(discharge)}"
     else:
         detail="Idle"
-    text(1270,304,detail,23,fill=GREEN,max_width=245)
-    for x,key in [(1540,"tesla_power"),(1800,"hyundai_power")]:
-        p=numeric(snapshot,key,True)
+    text(bx,304,detail,23,fill=GREEN,max_width=245)
+    for x,(key,_,_) in zip(xs[3:],enabled):
+        p=numeric(snapshot,f"{key}_power",True)
         text(x,304,"—" if p is None else (f"Charging · {power_text(p)}" if p>0.05 else "Not charging"),22,max_width=column_width(x))
     weather=snapshot.get("weather") or {}
     attrs=weather.get("attributes",{})
