@@ -67,8 +67,8 @@ not confirm the new picture, Home Assistant shows an error instead of
 pretending that everything is fine.
 
 I tested it on my kitchen Frame: picture MY_F0028 was deleted as soon as
-MY_F0029 arrived. Now there is always only one picture from the project on
-the TV.
+MY_F0029 arrived. After a successful update the previous picture is deleted.
+If the delete fails, the integration tries again on the next update.
 
 There was one more surprise. I expected the TV to ask "Allow?" the first time,
 but my 2019 Frame opens Art Mode without any token. My first version thought
@@ -94,15 +94,12 @@ removing something makes the project better.
 
 This project was more than putting numbers on a TV. I had to:
 
-- connect Home Assistant data to my own image renderer;
 - draw the picture with Python so it stays readable but still looks like art;
 - handle missing or wrong sensor values without breaking the picture;
 - talk to the TV directly over the local network and check that it really got
   the picture;
-- stop pictures from filling up the TV memory;
 - read logs to find the real reason when something fails;
-- test the code with a fake TV, so the tests do not need a real television;
-- write documentation that another person can follow.
+- test the code with a fake TV, so the tests do not need a real television.
 
 Not everything worked the first time. Some ideas I changed, some I removed.
 That is normal in a real project. I learned that the technical part must work
@@ -121,22 +118,9 @@ I put it on GitHub to build my technical portfolio, to show how I work, and to
 share it with the Home Assistant community. I would be happy to get feedback
 and learn from other people.
 
-## What makes it different
-
-- No new screen: it uses a screen that is already on the wall.
-- No new dashboard: the information becomes part of the artwork.
-- No app to open: I see what I need when I walk past.
-
 ## Final thought
 
-It started with an ordinary question: "Is there an easier way to check my
-Home Assistant?"
-
-It became a better question: "What if my smart home dashboard could be a
-painting?"
-
-For me the most important part is not only the code or the picture. It is the
-process: find a problem, try different solutions, learn from mistakes and make
-something useful.
+It started with a simple question: is there an easier way to check my Home
+Assistant? It became a better one: what if the dashboard could be a painting?
 
 The project is still growing.
