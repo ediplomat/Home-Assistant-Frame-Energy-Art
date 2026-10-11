@@ -1,3 +1,3 @@
 render:
   name: Generate and send energy art
-  description: Read current sensors, create the JPG atomically, then ask Samsung Frame Art to upload it.
+  description: Read current sensors, create the JPG atomically, then upload it to the paired TV (or hand it to Samsung Frame Art if no TV is paired here).

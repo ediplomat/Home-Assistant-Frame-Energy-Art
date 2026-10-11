@@ -25,7 +25,8 @@ integration with domain `samsung_frame`. That integration must provide
 authentication and uploading to the television. Samsung's standard media-player
 integration alone is insufficient. The uploader is not bundled here.
 
-**Storage limitation:** the tested uploader adds a new TV image for each update.
+**Storage limitation (separate uploader only):** the tested `samsung_frame`
+uploader adds a new TV image for each update.
 There is no automatic retention or deletion in this project. A 15-minute
 schedule can add 96 images per day. Start with manual updates and monitor the
 TV's storage before enabling frequent unattended updates. Do not use a
@@ -54,6 +55,25 @@ TV's storage before enabling frequent unattended updates. Do not use a
 No token or password belongs in this repository. The existing TV integration
 manages its own credentials. Installation currently requires copying the files;
 this project is not advertised as HACS-ready.
+
+## Built-in uploader (experimental)
+
+Instead of the separate `samsung_frame` integration you can let this
+integration talk to the TV directly. Enter the TV's IP address during setup or
+later in **Configure**, press Submit and choose **Allow** on the TV. The TV's
+token is kept in Home Assistant's own storage.
+
+Each update then:
+
+1. uploads the new picture and waits for the TV to confirm it;
+2. shows it in Art Mode;
+3. deletes this project's previous picture (and only that — personal artwork
+   and photos are never touched).
+
+If the TV does not confirm, the render action fails and the status sensor's
+`error` attribute says why. Pictures that could not be deleted are retried on
+the next update (`pending_deletes`). Tested only with a 2019 Frame (43-inch).
+Leave the IP address empty to keep the previous behaviour with `samsung_frame`.
 
 ## Entity mapping
 
@@ -101,9 +121,8 @@ No schedule is installed automatically by the integration.
   generation. Its `last_upload_attempt` attribute means an attempt, not confirmed
   delivery. Its `error` attribute records errors propagated to this integration.
 
-Only one config entry is supported. Changing the entity mapping requires
-removing and adding this companion entry; your separate Samsung pairing remains
-in its own integration. To stop updates, disable your automation. To return to
+Only one config entry is supported. Sensors, paths and the TV can be changed
+later with **Configure** on the integration. To stop updates, disable your automation. To return to
 ordinary artwork, select it through your existing Samsung integration or TV.
 
 ## Development

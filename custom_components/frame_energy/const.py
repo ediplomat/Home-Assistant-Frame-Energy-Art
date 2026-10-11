@@ -1,7 +1,13 @@
 DOMAIN = "frame_energy"
-DEFAULTS = {
+CONF_TV_HOST = "tv_host"
+CONF_TV_TOKEN = "tv_token"
+STORAGE_VERSION = 1
+
+PATH_DEFAULTS = {
     "background_path": "/media/frame_assets/tuscan_background.jpg",
     "output_path": "/media/frame/frame_energy_live.jpg",
+}
+ENTITY_DEFAULTS = {
     "solar": "sensor.solar_power",
     "home": "sensor.home_power",
     "battery": "sensor.home_battery_percentage",
@@ -13,3 +19,4 @@ DEFAULTS = {
     "hyundai_power": "sensor.hyundai_charging_power",
     "weather": "weather.home",
 }
+DEFAULTS = {**PATH_DEFAULTS, **ENTITY_DEFAULTS}

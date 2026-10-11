@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Frame Energy Art",
-        "description": "Local live artwork for the existing Samsung Frame Art integration. Entity IDs can be changed below.",
+        "description": "Local live artwork for Samsung The Frame. Change entity IDs below. Enter the TV's IP address to use the built-in uploader, or leave it empty to keep using the separate Samsung Frame Art integration.",
         "data": {
           "background_path": "Clean artwork path",
           "output_path": "Generated JPG path",
@@ -17,16 +17,54 @@
           "tesla_power": "Tesla charging power",
           "hyundai": "IONIQ 6 percentage",
           "hyundai_power": "IONIQ 6 charging power",
-          "weather": "Weather"
+          "weather": "Weather",
+          "tv_host": "TV IP address (optional, built-in uploader)"
         }
+      },
+      "pair": {
+        "title": "Pair with the TV",
+        "description": "Turn the TV on, press Submit, then choose Allow on the TV ({host}) within 30 seconds."
       }
     },
     "error": {
       "missing_background": "The clean background file does not exist",
-      "same_path": "Output must not overwrite the background"
+      "same_path": "Output must not overwrite the background",
+      "pairing_failed": "The TV did not allow the connection. Check the IP address, that the TV is on, and press Allow on the TV."
     },
     "abort": {
       "already_configured": "Already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frame Energy Art",
+        "description": "Local live artwork for Samsung The Frame. Change entity IDs below. Enter the TV's IP address to use the built-in uploader, or leave it empty to keep using the separate Samsung Frame Art integration.",
+        "data": {
+          "background_path": "Clean artwork path",
+          "output_path": "Generated JPG path",
+          "solar": "Solar power",
+          "home": "Home power",
+          "battery": "Home battery percentage",
+          "battery_charge": "Battery charging power",
+          "battery_discharge": "Battery discharging power",
+          "tesla": "Tesla percentage",
+          "tesla_power": "Tesla charging power",
+          "hyundai": "IONIQ 6 percentage",
+          "hyundai_power": "IONIQ 6 charging power",
+          "weather": "Weather",
+          "tv_host": "TV IP address (optional, built-in uploader)"
+        }
+      },
+      "pair": {
+        "title": "Pair with the TV",
+        "description": "Turn the TV on, press Submit, then choose Allow on the TV ({host}) within 30 seconds."
+      }
+    },
+    "error": {
+      "missing_background": "The clean background file does not exist",
+      "same_path": "Output must not overwrite the background",
+      "pairing_failed": "The TV did not allow the connection. Check the IP address, that the TV is on, and press Allow on the TV."
     }
   }
 }
