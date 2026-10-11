@@ -1,0 +1,17 @@
+alias: Frame Energy Art update
+triggers:
+  - trigger: time_pattern
+    minutes: "/15"
+  - trigger: homeassistant
+    event: start
+    id: startup
+conditions: []
+actions:
+  - if:
+      - condition: trigger
+        id: startup
+    then:
+      - delay: "00:01:00"
+  - action: frame_energy.render
+mode: single
+max_exceeded: silent
