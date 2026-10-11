@@ -8,6 +8,8 @@ Created by **Ilja Dulushkov** ([@ediplomat](https://github.com/ediplomat)), MEng
 
 ![Example artwork with fictional data](docs/demo.jpg)
 
+Why I built it and what I learned: [The story behind the project](docs/STORY.md).
+
 The idea: it should look like a painting on the wall, not like a tablet with a
 dashboard. Numbers sit in the sky in the painting's own colours and a gallery
 serif; there are no panels, boxes or clocks. Vehicles are shown as monograms
