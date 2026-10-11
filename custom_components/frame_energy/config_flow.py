@@ -7,10 +7,13 @@ from homeassistant.core import callback
 
 from . import tv
 from .const import CONF_TV_HOST, CONF_TV_TOKEN, DEFAULTS, DOMAIN
+from .render import LABEL_DEFAULTS
 
 
 def _schema(current: dict) -> vol.Schema:
     fields = {vol.Required(key, default=current.get(key, value)): str for key, value in DEFAULTS.items()}
+    for key, value in LABEL_DEFAULTS.items():
+        fields[vol.Optional(key, default=current.get(key, value))] = str
     fields[vol.Optional(CONF_TV_HOST, default=current.get(CONF_TV_HOST, ""))] = str
     return vol.Schema(fields)
 

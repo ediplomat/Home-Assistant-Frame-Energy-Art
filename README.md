@@ -8,9 +8,13 @@ Created by [ediplomat](https://github.com/ediplomat).
 
 ![Example artwork with fictional data](docs/demo.jpg)
 
-The painting is generated as a 1920 × 1080 JPEG. It includes the date and a small
-**Updated** timestamp, without a digital clock that could show stale time.
-It reads existing Home Assistant states; it does not wake or poll the vehicles.
+The idea: it should look like a painting on the wall, not like a tablet with a
+dashboard. Numbers sit in the sky in the painting's own colours and a gallery
+serif; there are no panels, boxes or clocks. Vehicles are shown as monograms
+(for example **T** and **H**) rather than brand logos.
+
+The painting is generated as a 1920 × 1080 JPEG with today's date. It reads
+existing Home Assistant states; it does not wake or poll the vehicles.
 
 ## Status and compatibility
 
@@ -53,8 +57,9 @@ TV's storage before enabling frequent unattended updates. Do not use a
    after the first render, with `/media/frame` as the image folder.
 
 No token or password belongs in this repository. The existing TV integration
-manages its own credentials. Installation currently requires copying the files;
-this project is not advertised as HACS-ready.
+manages its own credentials. Installation by copying files works today. The repository also contains
+`hacs.json`, so once it is public it can be added to HACS as a custom
+repository (Integration).
 
 ## Built-in uploader (experimental)
 
@@ -93,12 +98,12 @@ placeholders, not automatically created sensors.
 | Hyundai power | `sensor.hyundai_charging_power` | W or kW |
 | Weather | `weather.home` | Weather entity with daily forecasts |
 
-The initial layout uses Tesla and Hyundai labels. To use different vehicle
-names or icons, edit `render.py`. Power units come from sensor attributes.
+Vehicle names, their monograms (one or two letters) and the text under the
+weather (for example your village) are set in the integration's form. Power units come from sensor attributes.
 Missing, non-finite or unsupported values display a dash, and percentages
 outside 0–100 are rejected. Existing sensor values can be stale; the integration
-does not verify their freshness. The Updated timestamp describes generation
-of the picture, not the age of each sensor reading.
+does not verify their freshness; the status sensor shows when the picture was
+last generated.
 
 ## Optional schedule
 
@@ -137,6 +142,11 @@ Run the local renderer checks with:
 python -m pip install 'Pillow>=10.0.0'
 python -m unittest discover -s tests
 ```
+
+## Support
+
+Shared as is, from one home setup. Issues and pull requests are welcome, but
+there is no promise of support or of compatibility with other TV models.
 
 ## Licence and assets
 

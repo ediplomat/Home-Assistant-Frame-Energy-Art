@@ -9,6 +9,16 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 INK = "#444936"
 GREEN = "#526846"
 GOLD = "#c49631"
+# Darker than the sky so clouds stay readable on warm backgrounds yet look painted.
+CLOUD = "#8a8678"
+RIGHT_EDGE = 1900
+LABEL_DEFAULTS = {
+    "vehicle1_name": "Tesla",
+    "vehicle1_letter": "T",
+    "vehicle2_name": "Hyundai IONIQ 6",
+    "vehicle2_letter": "H",
+    "location_name": "Local weather",
+}
 WEATHER_NAMES = {"cloudy":"Cloudy", "partlycloudy":"Partly cloudy", "sunny":"Sunny", "clear-night":"Clear night", "rainy":"Rain", "pouring":"Heavy rain", "lightning-rainy":"Thunderstorms", "lightning":"Thunderstorms", "snowy":"Snow", "snowy-rainy":"Sleet", "fog":"Fog", "windy":"Windy", "windy-variant":"Windy", "exceptional":"Weather alert"}
 
 def finite(value):
@@ -48,7 +58,7 @@ def load_font(size):
 def draw_weather(d, cx, cy, condition, scale=1):
     s = scale
     def cloud(x, y):
-        fill = "#a19e92"
+        fill = CLOUD
         for a,b,r in [(x-19*s,y,18*s),(x,y-9*s,24*s),(x+23*s,y+1*s,17*s)]:
             d.ellipse((a-r,b-r,a+r,b+r),fill=fill)
         d.rounded_rectangle((x-31*s,y,x+32*s,y+18*s),radius=9*s,fill=fill)
@@ -76,7 +86,12 @@ def draw_weather(d, cx, cy, condition, scale=1):
     else:
         d.text((cx,cy),"—",font=load_font(int(32*s)),fill=INK,anchor="mm")
 
-def render(background, output, snapshot, forecast, now):
+def column_width(x, width=245):
+    """Keep centred text inside the frame: never wider than twice the gap to the edge."""
+    return min(width, 2 * (RIGHT_EDGE - x))
+
+def render(background, output, snapshot, forecast, now, labels=None):
+    labels = {**LABEL_DEFAULTS, **{k: v for k, v in (labels or {}).items() if v}}
     with Image.open(background) as source:
         im = ImageOps.fit(source.convert("RGB"), (1920,1080), method=Image.Resampling.LANCZOS)
     d = ImageDraw.Draw(im)
@@ -86,7 +101,7 @@ def render(background, output, snapshot, forecast, now):
             size-=1
         d.text((x,y),str(value),font=load_font(size),fill=fill,anchor=anchor)
     text(75,204,f"{now:%A}, {now.day} {now:%B %Y}",29,"lt",max_width=485)
-    columns=[(710,"Solar generation","solar"),(990,"Home consumption","home"),(1270,"Home battery","battery"),(1540,"Tesla","tesla"),(1800,"Hyundai IONIQ 6","hyundai")]
+    columns=[(710,"Solar generation","solar"),(990,"Home consumption","home"),(1270,"Home battery","battery"),(1540,labels["vehicle1_name"],"tesla"),(1800,labels["vehicle2_name"],"hyundai")]
     # Simple icons are drawn by code so their meaning never changes with data.
     draw_weather(d,710,110,"sunny",1.15)
     d.polygon([(958,113),(990,82),(1022,113),(1013,113),(1013,147),(967,147),(967,113)],fill=INK)
@@ -96,12 +111,13 @@ def render(background, output, snapshot, forecast, now):
     b=numeric(snapshot,"battery")
     if b is not None:
         d.rectangle((1256,141-int(53*b/100),1284,141),fill=GREEN)
-    text(1540,112,"T",68)
-    text(1800,112,"H",52)
+    # Monograms instead of brand logos: recognisable, but the picture stays a painting.
+    text(1540,112,labels["vehicle1_letter"][:2],68)
+    text(1800,112,labels["vehicle2_letter"][:2],52)
     for index,(x,label,key) in enumerate(columns):
         value=numeric(snapshot,key,power=key in ("solar","home"))
-        text(x,207,power_text(value) if key in ("solar","home") else percent_text(value),56,max_width=245)
-        text(x,266,label,25,max_width=245)
+        text(x,207,power_text(value) if key in ("solar","home") else percent_text(value),56,max_width=column_width(x))
+        text(x,266,label,25,max_width=column_width(x))
         if index < 4:
             d.line((x+142,85,x+142,306),fill="#b8ad92",width=1)
     charge=numeric(snapshot,"battery_charge",True)
@@ -117,7 +133,7 @@ def render(background, output, snapshot, forecast, now):
     text(1270,304,detail,23,fill=GREEN,max_width=245)
     for x,key in [(1540,"tesla_power"),(1800,"hyundai_power")]:
         p=numeric(snapshot,key,True)
-        text(x,304,"—" if p is None else (f"Charging · {power_text(p)}" if p>0.05 else "Not charging"),22,max_width=245)
+        text(x,304,"—" if p is None else (f"Charging · {power_text(p)}" if p>0.05 else "Not charging"),22,max_width=column_width(x))
     weather=snapshot.get("weather") or {}
     attrs=weather.get("attributes",{})
     condition=weather.get("state","")
@@ -126,7 +142,7 @@ def render(background, output, snapshot, forecast, now):
     unit=attrs.get("temperature_unit", "")
     text(1718,467,"—" if temp is None else f"{temp:.0f}°",88)
     text(1718,559,WEATHER_NAMES.get(condition,"Weather unavailable"),30,max_width=340)
-    text(1718,600,"Local weather",24)
+    text(1718,600,labels["location_name"],24,max_width=340)
     text(1870,457,unit or "",20)
     d.line((1510,665,1880,665),fill="#a79b82",width=2)
     future=[]
@@ -150,7 +166,6 @@ def render(background, output, snapshot, forecast, now):
             text(x,853,"—" if high is None else f"{high:.0f}°",33)
         else:
             text(x,782,"—",32)
-    text(1854,1003,f"Updated {now:%H:%M}",19,"rm")
     out=Path(output)
     out.parent.mkdir(parents=True,exist_ok=True)
     with tempfile.NamedTemporaryFile(prefix=".frame_energy_",suffix=".jpg",dir=out.parent,delete=False) as f:

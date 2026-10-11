@@ -13,12 +13,17 @@
           "battery": "Home battery percentage",
           "battery_charge": "Battery charging power",
           "battery_discharge": "Battery discharging power",
-          "tesla": "Tesla percentage",
-          "tesla_power": "Tesla charging power",
-          "hyundai": "IONIQ 6 percentage",
-          "hyundai_power": "IONIQ 6 charging power",
+          "tesla": "First vehicle battery %",
+          "tesla_power": "First vehicle charging power",
+          "hyundai": "Second vehicle battery %",
+          "hyundai_power": "Second vehicle charging power",
           "weather": "Weather",
-          "tv_host": "TV IP address (optional, built-in uploader)"
+          "tv_host": "TV IP address (optional, built-in uploader)",
+          "vehicle1_name": "First vehicle name",
+          "vehicle1_letter": "First vehicle monogram (1–2 letters)",
+          "vehicle2_name": "Second vehicle name",
+          "vehicle2_letter": "Second vehicle monogram (1–2 letters)",
+          "location_name": "Text under the weather (e.g. your village)"
         }
       },
       "pair": {
@@ -48,12 +53,17 @@
           "battery": "Home battery percentage",
           "battery_charge": "Battery charging power",
           "battery_discharge": "Battery discharging power",
-          "tesla": "Tesla percentage",
-          "tesla_power": "Tesla charging power",
-          "hyundai": "IONIQ 6 percentage",
-          "hyundai_power": "IONIQ 6 charging power",
+          "tesla": "First vehicle battery %",
+          "tesla_power": "First vehicle charging power",
+          "hyundai": "Second vehicle battery %",
+          "hyundai_power": "Second vehicle charging power",
           "weather": "Weather",
-          "tv_host": "TV IP address (optional, built-in uploader)"
+          "tv_host": "TV IP address (optional, built-in uploader)",
+          "vehicle1_name": "First vehicle name",
+          "vehicle1_letter": "First vehicle monogram (1–2 letters)",
+          "vehicle2_name": "Second vehicle name",
+          "vehicle2_letter": "Second vehicle monogram (1–2 letters)",
+          "location_name": "Text under the weather (e.g. your village)"
         }
       },
       "pair": {

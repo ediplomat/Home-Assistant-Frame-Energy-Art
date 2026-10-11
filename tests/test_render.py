@@ -28,5 +28,17 @@ class RendererTests(unittest.TestCase):
                 self.assertEqual(result.format, "JPEG")
             self.assertEqual(list(Path(tmp).glob(".frame_energy_*")), [])
 
+    def test_column_width_stays_inside_frame(self):
+        self.assertEqual(renderer.column_width(710), 245)
+        self.assertLessEqual(1800 + renderer.column_width(1800) / 2, renderer.RIGHT_EDGE)
+
+    def test_custom_labels_render(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "art.jpg"
+            renderer.render(ROOT / "assets/tuscan_background.jpg", output, {}, [], datetime(2026, 1, 1, tzinfo=timezone.utc),
+                            {"vehicle1_name": "Volkswagen ID.Buzz Long Range", "vehicle1_letter": "V", "location_name": ""})
+            self.assertTrue(output.is_file())
+
+
 if __name__ == "__main__":
     unittest.main()
