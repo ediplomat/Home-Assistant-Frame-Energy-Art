@@ -47,12 +47,33 @@ paints them onto the background picture and sends the new picture to the TV.
 An automation runs it every 15 minutes. That is fresh enough, and the TV is
 not flooded with pictures.
 
-The TV part was the hardest. Every upload adds a new picture to the TV, so
-after one day there would be almost a hundred of them. I solved it in my own
-code: the integration waits until the TV confirms the new picture, shows it,
-and then deletes only the previous picture made by the project. My own photos
-on the TV stay untouched. If the TV does not confirm, Home Assistant shows an
-error instead of pretending that everything is fine.
+## The pictures that would not stop
+
+The TV part was the hardest. Every upload added a new picture to the TV and
+nothing removed the old ones. I could see the numbers grow: MY_F0010,
+MY_F0011, and later almost thirty pictures of the same painting in My Photos.
+With an update every 15 minutes that would be almost a hundred pictures a day,
+until the TV memory was full.
+
+So I wrote my own connection to the TV. Now every update:
+
+1. sends the new picture and waits until the TV confirms it;
+2. shows it on the screen;
+3. deletes the previous picture made by the project.
+
+My own photos and artworks on the TV are never touched. If a delete does not
+work, the integration remembers it and tries again next time. If the TV does
+not confirm the new picture, Home Assistant shows an error instead of
+pretending that everything is fine.
+
+I tested it on my kitchen Frame: picture MY_F0028 was deleted as soon as
+MY_F0029 arrived. Now there is always only one picture from the project on
+the TV.
+
+There was one more surprise. I expected the TV to ask "Allow?" the first time,
+but my 2019 Frame opens Art Mode without any token. My first version thought
+this was an error. The logs showed the real reason, and the fix was to accept
+it as a normal case.
 
 ## Why I removed the clock
 
@@ -78,7 +99,8 @@ This project was more than putting numbers on a TV. I had to:
 - handle missing or wrong sensor values without breaking the picture;
 - talk to the TV directly over the local network and check that it really got
   the picture;
-- keep the TV storage clean;
+- stop pictures from filling up the TV memory;
+- read logs to find the real reason when something fails;
 - test the code with a fake TV, so the tests do not need a real television;
 - write documentation that another person can follow.
 
