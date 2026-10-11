@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Frame Energy Art",
-        "description": "Local live artwork for Samsung The Frame. Change entity IDs below. Enter the TV's IP address to use the built-in uploader, or leave it empty to keep using the separate Samsung Frame Art integration.",
+        "description": "Live artwork for Samsung The Frame. Choose your sensors, the names shown in the picture and the TV's IP address.",
         "data": {
           "background_path": "Clean artwork path",
           "output_path": "Generated JPG path",
@@ -18,7 +18,7 @@
           "hyundai": "Second vehicle battery %",
           "hyundai_power": "Second vehicle charging power",
           "weather": "Weather",
-          "tv_host": "TV IP address (optional, built-in uploader)",
+          "tv_host": "TV IP address",
           "vehicle1_name": "First vehicle name",
           "vehicle1_letter": "First vehicle monogram (1–2 letters)",
           "vehicle2_name": "Second vehicle name",
@@ -34,7 +34,8 @@
     "error": {
       "missing_background": "The clean background file does not exist",
       "same_path": "Output must not overwrite the background",
-      "pairing_failed": "The TV did not allow the connection. Check the IP address, that the TV is on, and press Allow on the TV."
+      "pairing_failed": "The TV did not allow the connection. Check the IP address, that the TV is on, and press Allow on the TV.",
+      "missing_host": "Enter the IP address of the TV"
     },
     "abort": {
       "already_configured": "Already configured"
@@ -44,7 +45,7 @@
     "step": {
       "init": {
         "title": "Frame Energy Art",
-        "description": "Local live artwork for Samsung The Frame. Change entity IDs below. Enter the TV's IP address to use the built-in uploader, or leave it empty to keep using the separate Samsung Frame Art integration.",
+        "description": "Live artwork for Samsung The Frame. Choose your sensors, the names shown in the picture and the TV's IP address.",
         "data": {
           "background_path": "Clean artwork path",
           "output_path": "Generated JPG path",
@@ -58,7 +59,7 @@
           "hyundai": "Second vehicle battery %",
           "hyundai_power": "Second vehicle charging power",
           "weather": "Weather",
-          "tv_host": "TV IP address (optional, built-in uploader)",
+          "tv_host": "TV IP address",
           "vehicle1_name": "First vehicle name",
           "vehicle1_letter": "First vehicle monogram (1–2 letters)",
           "vehicle2_name": "Second vehicle name",
@@ -74,7 +75,8 @@
     "error": {
       "missing_background": "The clean background file does not exist",
       "same_path": "Output must not overwrite the background",
-      "pairing_failed": "The TV did not allow the connection. Check the IP address, that the TV is on, and press Allow on the TV."
+      "pairing_failed": "The TV did not allow the connection. Check the IP address, that the TV is on, and press Allow on the TV.",
+      "missing_host": "Enter the IP address of the TV"
     }
   }
 }

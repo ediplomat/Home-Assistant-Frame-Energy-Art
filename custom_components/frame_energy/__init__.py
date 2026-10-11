@@ -1,9 +1,4 @@
-"""Generate live art locally and show it on Samsung The Frame.
-
-Upload path:
-- built-in uploader when a TV is paired in this integration's options;
-- otherwise the separate ``samsung_frame.update`` service (legacy setup).
-"""
+"""Generate live art locally and show it on Samsung The Frame."""
 import asyncio
 import logging
 from pathlib import Path
@@ -37,7 +32,6 @@ async def async_setup_entry(hass, entry):
         "last_upload_attempt": None,
         "last_upload_confirmed": None,
         "content_id": None,
-        "uploader": None,
         "error": None,
         "uploaded_ids": list(saved.get("ids", [])),
         "store": store,
@@ -72,10 +66,7 @@ async def async_setup_entry(hass, entry):
                 runtime["error"] = None
                 async_dispatcher_send(hass, f"{DOMAIN}_updated")
                 runtime["last_upload_attempt"] = dt_util.utcnow().isoformat()
-                if config.get(CONF_TV_HOST):
-                    await _upload_builtin(hass, runtime, config)
-                else:
-                    await _upload_legacy(hass, runtime, config)
+                await _upload(hass, runtime, config)
             except Exception as exc:
                 runtime["error"] = str(exc)
                 _LOGGER.exception("Frame Energy rendering/upload failed")
@@ -87,9 +78,10 @@ async def async_setup_entry(hass, entry):
     return True
 
 
-async def _upload_builtin(hass, runtime, config):
+async def _upload(hass, runtime, config):
     """Upload with confirmation, show it, then delete this project's older images."""
-    runtime["uploader"] = "built-in"
+    if not config.get(CONF_TV_HOST):
+        raise RuntimeError("No TV paired: open Configure on Frame Energy Art and enter the TV IP address")
     jpeg = await hass.async_add_executor_job(Path(config["output_path"]).read_bytes)
     result = await hass.async_add_executor_job(
         tv.publish, config[CONF_TV_HOST], runtime["token"], jpeg, list(runtime["uploaded_ids"]))
@@ -112,14 +104,6 @@ async def _save(runtime, config):
         "token": runtime["token"],
         "paired_token": config.get(CONF_TV_TOKEN),
     })
-
-
-async def _upload_legacy(hass, runtime, config):
-    """Hand the file to the separate Samsung Frame Art integration (no confirmation)."""
-    runtime["uploader"] = "samsung_frame"
-    if not hass.services.has_service("samsung_frame", "update"):
-        raise RuntimeError("No TV paired here and the samsung_frame.update service is unavailable")
-    await hass.services.async_call("samsung_frame", "update", {"image_path": config["output_path"]}, blocking=True)
 
 
 async def _reload_on_options(hass, entry):

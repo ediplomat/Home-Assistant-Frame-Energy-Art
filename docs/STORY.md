@@ -1,183 +1,120 @@
 # The Story Behind Home Assistant Frame Energy Art
 
-## How It All Started
+## How it started
 
 This project started with a simple problem in my own home.
 
-I was already using Home Assistant to monitor my home energy system, including solar energy production, electricity consumption, batteries and other useful information.
+I use Home Assistant to watch my home energy: solar production, electricity
+use, the home battery and our two electric cars. Everything was there, but to
+see it I had to open the app on my iPhone or sit at the computer every time.
 
-Everything was available in Home Assistant, but there was one inconvenience.
+It worked, but it was not convenient. I wanted to see the important things just
+by walking past.
 
-Every time I wanted to check what was happening in my home, I had to open the Home Assistant app on my iPhone or use my computer.
+## Looking for a better way
 
-It worked, but it was not always convenient.
+I looked at what other people in the Home Assistant community do: tablets on
+the wall, small screens, special dashboard displays. Many good ideas, but all
+of them needed one more device, one more power cable and one more screen in
+the house.
 
-I wanted something simpler. I wanted to see the most important information just by looking at a screen, without opening an application.
+Then I looked at my Samsung The Frame. It already hangs on the wall and shows
+paintings when nobody watches TV.
 
-## Looking for a Better Solution
+So I asked myself: why buy another screen? What if the painting itself could
+show my home?
 
-I started searching for different smart home displays and dashboards.
+That was the beginning of this project.
 
-I looked at how other people in the Home Assistant community were displaying information around their homes.
+## A painting, not a dashboard
 
-There were many interesting ideas, including tablets, wall-mounted screens and dedicated dashboard displays.
+I did not want to turn the TV into one more dashboard with buttons, cards and
+graphs. There are already many good ones.
 
-But most of these solutions required another device, another power supply and another screen somewhere in the house.
+The painting had to stay the main thing. The numbers had to become part of the
+picture: in the sky, in the colours of the painting, in a calm serif font, with
+no boxes around them.
 
-Then I looked at my Samsung The Frame TV.
+For the cars I used only the first letters, T and H. You can still see which
+car is which, but the picture does not turn into an advert full of logos.
 
-And I had a thought:
+## Making it update by itself
 
-Why should I buy another screen when I already have a beautiful display on my wall?
+A real painting never changes, but my home does, all day.
 
-Samsung The Frame was designed to display artwork when the television was not being used normally.
+I wrote a Home Assistant integration in Python. It takes the latest values,
+paints them onto the background picture and sends the new picture to the TV.
+An automation runs it every 15 minutes. That is fresh enough, and the TV is
+not flooded with pictures.
 
-So I asked myself another question:
+The TV part was the hardest. Every upload adds a new picture to the TV, so
+after one day there would be almost a hundred of them. I solved it in my own
+code: the integration waits until the TV confirms the new picture, shows it,
+and then deletes only the previous picture made by the project. My own photos
+on the TV stay untouched. If the TV does not confirm, Home Assistant shows an
+error instead of pretending that everything is fine.
 
-What if I could use a painting to display live information from my smart home?
+## Why I removed the clock
 
-That was the beginning of Home Assistant Frame Energy Art.
+At first I had a clock in the picture. It looked useful.
 
-## A Dashboard That Still Looks Like Art
+Then I understood: the picture changes only every 15 minutes. The clock would
+show 14:00 when it is already 14:12. A clock that is wrong most of the time is
+worse than no clock.
 
-I did not want to turn my Samsung Frame into a traditional Home Assistant dashboard.
+I changed it to the time of the last update. Later I removed that too, because
+even a small timestamp made the picture look like a screen again. Now there is
+only the date.
 
-There are already many excellent dashboards with buttons, graphs, cards and controls.
+Good design is not about adding as many features as possible. Sometimes
+removing something makes the project better.
 
-My idea was different.
+## What I learned
 
-I wanted the television to continue looking like a painting, while also showing useful information about my home.
+This project was more than putting numbers on a TV. I had to:
 
-The artwork should remain the main visual element.
+- connect Home Assistant data to my own image renderer;
+- draw the picture with Python so it stays readable but still looks like art;
+- handle missing or wrong sensor values without breaking the picture;
+- talk to the TV directly over the local network and check that it really got
+  the picture;
+- keep the TV storage clean;
+- test the code with a fake TV, so the tests do not need a real television;
+- write documentation that another person can follow.
 
-The energy information should be part of the composition, not something that completely covers the picture.
+Not everything worked the first time. Some ideas I changed, some I removed.
+That is normal in a real project. I learned that the technical part must work
+together with the design and with how people really live with it.
 
-I started developing a system that takes information from Home Assistant and places it onto a background painting.
+## Education and why I published it
 
-The information can include solar production, home electricity consumption, battery status, electric vehicles and weather conditions.
+I finished a Pearson BTEC Level 4 HNC in Computing (Cyber Security) with
+Merit, and now I study MEng Autonomous Robotics at NMITE in Hereford.
 
-The result is an image that combines artwork with useful smart home information.
+I like networks, automation and practical problems. I wanted to build
+something useful outside the classroom, and this project became one of my
+personal projects.
 
-## Making the Painting Update Automatically
+I put it on GitHub to build my technical portfolio, to show how I work, and to
+share it with the Home Assistant community. I would be happy to get feedback
+and learn from other people.
 
-The next challenge was automation.
+## What makes it different
 
-A normal painting does not change, but the information from Home Assistant changes throughout the day.
+- No new screen: it uses a screen that is already on the wall.
+- No new dashboard: the information becomes part of the artwork.
+- No app to open: I see what I need when I walk past.
 
-I needed a way to generate a new image automatically and send it to Samsung The Frame.
+## Final thought
 
-I worked on a solution using Python, Home Assistant and image generation.
+It started with an ordinary question: "Is there an easier way to check my
+Home Assistant?"
 
-The system creates an updated image using the latest available data.
+It became a better question: "What if my smart home dashboard could be a
+painting?"
 
-An automation can then send the new artwork to the television at regular intervals.
+For me the most important part is not only the code or the picture. It is the
+process: find a problem, try different solutions, learn from mistakes and make
+something useful.
 
-For my project, I explored updating the image every 15 minutes.
-
-This provided a useful balance between reasonably fresh information and avoiding unnecessary image updates.
-
-It also introduced an important technical consideration: frequent updates may create many images on the television, depending on how the Samsung Frame integration handles uploaded artwork.
-
-This is one of the areas that needs careful testing and improvement.
-
-To solve it, I am adding my own uploader to the project. It waits for the television to confirm each new picture and then removes only the previous picture created by this project, so personal artwork stays untouched.
-
-## Why I Removed the Clock
-
-During development, I experimented with different elements in the painting.
-
-One of the early ideas was to include a clock.
-
-At first, it seemed like a useful feature.
-
-But then I realised something important.
-
-If the painting updates every 15 minutes, the clock will not show the actual current time between updates.
-
-For example, the picture might show 14:00 when the real time is already 14:12.
-
-This could make the clock confusing rather than useful.
-
-I decided that showing the time of the last data update was a better solution.
-
-Later I removed that as well. A small timestamp still made the picture look like a screen, not a painting. The date stays, and Home Assistant itself keeps the time of the last update.
-
-This was a useful lesson for me.
-
-Good design is not about adding as many features as possible. Sometimes removing a feature makes the project better.
-
-## Learning Through Real Problems
-
-This project has been more than just displaying numbers on a television.
-
-It has involved solving several practical problems:
-
-- Connecting Home Assistant data to a custom image renderer.
-- Using Python to create dynamic artwork.
-- Designing information that is readable without destroying the appearance of the painting.
-- Handling missing or unavailable sensor data.
-- Planning automatic image updates.
-- Considering the limitations of Samsung The Frame and its Art Mode.
-- Testing the renderer and documenting the project.
-
-Not every idea worked perfectly the first time.
-
-Some parts needed to be changed, simplified or reconsidered.
-
-But this is an important part of developing a real project.
-
-I learned that the technical solution must work together with the design and the everyday needs of the person using it.
-
-## My Education and Why I Published This Project
-
-I completed a Pearson BTEC Level 4 Higher National Certificate (HNC) in Computing (Cyber Security), achieving an overall Merit.
-
-During my studies, I developed an interest in networking, computing, artificial intelligence, automation and practical problem-solving.
-
-I wanted to continue learning by creating something useful outside the classroom.
-
-Home Assistant Frame Energy Art became one of my personal projects.
-
-It allowed me to explore how different technologies can work together to solve a real problem in my own home.
-
-I decided to document the project on GitHub so that I could build my technical portfolio, demonstrate my practical skills and share the development process.
-
-I also hope to present the project as part of my continuing education and professional development.
-
-In the future, I would like to share the project with the wider Home Assistant community, receive feedback and learn from other users.
-
-## What Makes This Project Different?
-
-The main idea is simple.
-
-Instead of adding another screen to the house, I wanted to make better use of a screen that was already there.
-
-Instead of building another traditional dashboard, I wanted information to become part of the artwork.
-
-And instead of checking an application every time, I wanted to see the important information naturally as I walked past the television.
-
-The project is still experimental, and there are areas I want to improve.
-
-But it has already changed how I think about smart home interfaces.
-
-A smart home display does not always need to look like a computer screen.
-
-Sometimes it can look like a painting.
-
-## Final Thought
-
-This project began with a very ordinary question:
-
-“Is there an easier way to check my Home Assistant information?”
-
-It developed into a much more interesting question:
-
-“What if my smart home dashboard could be a painting?”
-
-That idea became Home Assistant Frame Energy Art.
-
-For me, the most important part of this project is not only the code or the final image.
-
-It is the process of identifying a problem, exploring different solutions, experimenting, learning from mistakes and creating something useful.
-
-And the project is still evolving.
+The project is still growing.

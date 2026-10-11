@@ -27,9 +27,8 @@ class FrameEnergyStatus(SensorEntity):
     def extra_state_attributes(self):
         r = self.runtime
         return {
-            "uploader": r["uploader"],
             "last_upload_attempt": r["last_upload_attempt"],
-            # Only the built-in uploader can confirm that the TV accepted the image.
+            # Set only after the TV confirmed that it received the picture.
             "last_upload_confirmed": r["last_upload_confirmed"],
             "content_id": r["content_id"],
             "pending_deletes": max(len(r["uploaded_ids"]) - 1, 0),

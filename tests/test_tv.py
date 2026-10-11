@@ -1,4 +1,4 @@
-"""Protocol checks for the built-in uploader with a fake TV (no network)."""
+"""Protocol checks for the TV client with a fake TV (no network)."""
 import importlib.util
 import json
 import unittest

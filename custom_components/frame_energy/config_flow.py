@@ -14,7 +14,7 @@ def _schema(current: dict) -> vol.Schema:
     fields = {vol.Required(key, default=current.get(key, value)): str for key, value in DEFAULTS.items()}
     for key, value in LABEL_DEFAULTS.items():
         fields[vol.Optional(key, default=current.get(key, value))] = str
-    fields[vol.Optional(CONF_TV_HOST, default=current.get(CONF_TV_HOST, ""))] = str
+    fields[vol.Required(CONF_TV_HOST, default=current.get(CONF_TV_HOST, ""))] = str
     return vol.Schema(fields)
 
 
@@ -42,11 +42,11 @@ class FrameEnergyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             config = {**DEFAULTS, **user_input}
             config[CONF_TV_HOST] = config.get(CONF_TV_HOST, "").strip()
             errors = await _validate(self.hass, config)
+            if not config[CONF_TV_HOST]:
+                errors[CONF_TV_HOST] = "missing_host"
             if not errors:
                 self._config = config
-                if config[CONF_TV_HOST]:
-                    return await self.async_step_pair()
-                return self.async_create_entry(title="Frame Energy Art", data=config)
+                return await self.async_step_pair()
         return self.async_show_form(step_id="user", data_schema=_schema(user_input or {}), errors=errors)
 
     async def async_step_pair(self, user_input=None):
@@ -82,12 +82,13 @@ class FrameEnergyOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             options = {**user_input, CONF_TV_HOST: user_input.get(CONF_TV_HOST, "").strip()}
             errors = await _validate(self.hass, options)
+            if not options[CONF_TV_HOST]:
+                errors[CONF_TV_HOST] = "missing_host"
             if not errors:
                 self._options = options
                 if options[CONF_TV_HOST] and options[CONF_TV_HOST] != current.get(CONF_TV_HOST):
                     return await self.async_step_pair()
-                if options[CONF_TV_HOST]:
-                    options[CONF_TV_TOKEN] = current.get(CONF_TV_TOKEN)
+                options[CONF_TV_TOKEN] = current.get(CONF_TV_TOKEN)
                 return self.async_create_entry(title="", data=options)
         return self.async_show_form(step_id="init", data_schema=_schema(user_input or current), errors=errors)
 
