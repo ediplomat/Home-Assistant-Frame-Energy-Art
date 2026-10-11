@@ -1,4 +1,7 @@
-# Home Assistant Frame Energy Art
+# Frame Energy Art
+
+**Live home energy, painted into art for Samsung The Frame.**
+A Home Assistant integration.
 
 My Samsung The Frame shows a painting. The painting also shows my home:
 solar power, home consumption, the home battery, two electric cars and the

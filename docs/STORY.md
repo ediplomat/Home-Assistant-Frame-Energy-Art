@@ -1,4 +1,4 @@
-# The Story Behind Home Assistant Frame Energy Art
+# The Story Behind Frame Energy Art
 
 ## How it started
 
