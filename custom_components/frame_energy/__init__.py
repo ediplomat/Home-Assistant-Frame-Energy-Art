@@ -87,11 +87,13 @@ async def _upload(hass, runtime, config):
         tv.publish, config[CONF_TV_HOST], runtime["token"], jpeg, list(runtime["uploaded_ids"]))
     runtime["content_id"] = result["content_id"]
     runtime["last_upload_confirmed"] = dt_util.utcnow().isoformat()
-    # Cap the retry list so an unconfirmed delete on some firmware cannot grow it forever.
-    runtime["uploaded_ids"] = [result["content_id"], *result["pending"][:20]]
+    # Never drop an ID: a forgotten ID is a picture left on the TV forever.
+    # If deletes keep failing, pending_deletes on the status sensor grows.
+    runtime["uploaded_ids"] = [result["content_id"], *result["pending"]]
     if result["token"]:
         runtime["token"] = result["token"]
     await _save(runtime, config)
+    runtime["error"] = result["delete_error"]  # the upload worked, but show it on the sensor
     if result["delete_error"]:
         _LOGGER.warning("Old artwork kept for retry %s: %s", result["pending"], result["delete_error"])
 

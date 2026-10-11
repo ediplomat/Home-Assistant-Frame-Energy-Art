@@ -22,6 +22,7 @@ PORT = 8002
 CONNECT_TIMEOUT = 10
 PAIRING_TIMEOUT = 35  # time for a person to press "Allow" on the TV
 REPLY_TIMEOUT = 15
+MAX_DELETES = 5  # old images tried per update; the rest wait for the next one
 
 
 class FrameError(Exception):
@@ -173,20 +174,26 @@ def publish(host: str, token: str | None, jpeg: bytes, old_ids: list[str], conne
     """Upload and show the new image, then remove this project's older images.
 
     ``old_ids`` holds only content IDs this integration uploaded earlier.
-    IDs that could not be deleted are returned in ``pending`` so the next run
-    retries them instead of forgetting them on the TV.
+    IDs that were not deleted (failed, skipped or cut off by a lost
+    connection) are returned in ``pending``, so the next run retries them
+    instead of forgetting them on the TV.
     """
     with FrameClient(host, token, connector) as client:
         content_id = client.upload(jpeg)
-        # Never switch away from live TV: show now only if Art Mode is already on.
-        client.select(content_id, show=client.art_mode_on())
-        pending, delete_error = [], None
-        for old in old_ids:
-            if old == content_id:
-                continue
-            try:
-                client.delete(old)
-            except FrameError as exc:
-                pending.append(old)
-                delete_error = str(exc)
-        return {"content_id": content_id, "pending": pending, "delete_error": delete_error, "token": client.token}
+        # From here the new image exists on the TV, so its ID must always be
+        # returned, whatever fails next (for example a dropped connection).
+        old = [i for i in old_ids if i != content_id]
+        pending, error = list(old), None
+        try:
+            # Never switch away from live TV: show now only if Art Mode is already on.
+            client.select(content_id, show=client.art_mode_on())
+            for image in old[:MAX_DELETES]:
+                try:
+                    client.delete(image)
+                except FrameError as exc:
+                    error = str(exc)
+                else:
+                    pending.remove(image)
+        except Exception as exc:  # connection lost after the upload
+            error = f"Connection lost after upload ({exc})"
+        return {"content_id": content_id, "pending": pending, "delete_error": error, "token": client.token}

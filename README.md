@@ -21,7 +21,9 @@ Why I made it and what I learned: [The story behind the project](docs/STORY.md).
 - No boxes, panels or clock. A clock on a picture that updates every 15
   minutes would show the wrong time most of the time.
 - Cars are shown as monograms, for example **T** and **H**, not brand logos.
-- Everything runs locally in Home Assistant. Nothing goes to the cloud.
+- The integration works locally: the picture is drawn in Home Assistant and
+  sent to the TV over your home network. Your sensors can still come from
+  cloud integrations, for example cars or weather.
 
 ## What it does
 
@@ -36,7 +38,9 @@ Every update:
 
 Your own photos and artworks on the TV are never touched. If the TV does not
 confirm the picture, the action fails and the status sensor says why.
-Pictures that could not be deleted are tried again on the next update.
+Pictures that could not be deleted are remembered and tried again on the next
+update (up to 5 per update). If the number keeps growing, the status sensor
+shows it in `pending_deletes`.
 
 ## Status
 
@@ -47,9 +51,10 @@ changed Art Mode on newer models.
 ## Plans
 
 - Test a newer Samsung The Frame. I have a second, newer Frame at home.
-- Try LG OLED Gallery TVs. OLED can burn in from static pictures, so this
-  needs more than a new picture every 15 minutes: small shifts of the layout,
-  changing backgrounds and a darker image.
+- Try LG OLED Gallery TVs. **LG is not supported yet.** OLED can burn in from
+  static pictures, so this needs more than a new picture every 15 minutes.
+  Ideas, not tested yet: small shifts of the layout, changing backgrounds and
+  a darker image.
 - Make the update interval a setting, if people ask for it.
 
 If you test it on another TV, please open an issue and tell me the model and
@@ -71,16 +76,25 @@ restart Home Assistant.
 
 ### Background picture
 
-Copy `assets/tuscan_background.jpg` to
-`/media/frame_assets/tuscan_background.jpg`, or use your own picture
-(1920 × 1080 or larger).
+HACS installs only the integration, not the picture. Do this once:
+
+1. Download
+   [tuscan_background.jpg](https://github.com/ediplomat/Home-Assistant-Frame-Energy-Art/raw/main/assets/tuscan_background.jpg)
+   from this repository, or use your own picture (1920 × 1080 or larger).
+2. In Home Assistant open the `media` folder, for example with the
+   **File editor** or **Samba share** add-on.
+3. Create the folder `frame_assets` and put the picture there, so the path is
+   `/media/frame_assets/tuscan_background.jpg`.
+
+You can use another path; then enter it in the setup.
 
 ## Setup
 
 1. **Settings → Devices & services → Add integration → Frame Energy Art.**
 2. Choose your sensors, the names shown in the picture and the TV's IP address.
    Give the TV a fixed IP address in your router.
-3. Turn the TV on, press **Submit** and choose **Allow** on the TV.
+3. Turn the TV on and press **Submit**. If the TV asks, choose **Allow**.
+   Some models, like my 2019 Frame, connect without asking.
 4. Run **Frame Energy Art: Paint and show** (`frame_energy.render`) from
    Developer tools → Actions and look at the TV.
 
@@ -118,7 +132,8 @@ Assistant starts. Nothing is scheduled automatically.
 Attributes:
 
 - `last_upload_confirmed` – when the TV last confirmed a picture;
-- `content_id` – the picture now shown;
+- `content_id` – the current Art Mode artwork from this project (while you
+  watch TV it waits for Art Mode);
 - `pending_deletes` – old pictures still waiting to be deleted;
 - `error` – the last problem, if any.
 
@@ -126,8 +141,8 @@ Attributes:
 
 - **No Frame Energy Art in Add integration:** check the folder name and
   restart Home Assistant.
-- **Pairing fails:** check the IP address, that the TV is on, and press
-  **Allow** on the TV within 30 seconds.
+- **Pairing fails:** check the IP address and that the TV is on. If the TV
+  asks, press **Allow** within 30 seconds.
 - **Missing background:** check the path and that the file exists.
 - **Dashes instead of numbers:** check entity IDs, availability and units.
 - **No forecast:** the weather entity must support daily forecasts.

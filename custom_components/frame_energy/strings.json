@@ -28,13 +28,13 @@
       },
       "pair": {
         "title": "Pair with the TV",
-        "description": "Turn the TV on, press Submit, then choose Allow on the TV ({host}) within 30 seconds."
+        "description": "Turn the TV on and press Submit. If the TV ({host}) asks, choose Allow within 30 seconds."
       }
     },
     "error": {
       "missing_background": "The clean background file does not exist",
       "same_path": "Output must not overwrite the background",
-      "pairing_failed": "The TV did not allow the connection. Check the IP address, that the TV is on, and press Allow on the TV.",
+      "pairing_failed": "The TV did not open the connection. Check the IP address and that the TV is on. If the TV asks, choose Allow.",
       "missing_host": "Enter the IP address of the TV"
     },
     "abort": {
@@ -69,13 +69,13 @@
       },
       "pair": {
         "title": "Pair with the TV",
-        "description": "Turn the TV on, press Submit, then choose Allow on the TV ({host}) within 30 seconds."
+        "description": "Turn the TV on and press Submit. If the TV ({host}) asks, choose Allow within 30 seconds."
       }
     },
     "error": {
       "missing_background": "The clean background file does not exist",
       "same_path": "Output must not overwrite the background",
-      "pairing_failed": "The TV did not allow the connection. Check the IP address, that the TV is on, and press Allow on the TV.",
+      "pairing_failed": "The TV did not open the connection. Check the IP address and that the TV is on. If the TV asks, choose Allow.",
       "missing_host": "Enter the IP address of the TV"
     }
   }

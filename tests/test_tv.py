@@ -99,6 +99,27 @@ class UploaderTests(unittest.TestCase):
         self.assertEqual(result["pending"], ["MY_F0011"])
         self.assertIsNotNone(result["delete_error"])
 
+    def test_lost_connection_after_upload_keeps_all_ids(self):
+        fake = FakeTV([art("image_added", content_id="MY_F0012")])
+
+        def broken_send(text):
+            raise ConnectionError("socket closed")
+
+        fake.send = broken_send
+        result = tv.publish("10.0.0.5", "T0", b"JPEG", ["MY_F0011", "MY_F0010"], connector=fake)
+        self.assertEqual(result["content_id"], "MY_F0012")
+        self.assertEqual(result["pending"], ["MY_F0011", "MY_F0010"])
+        self.assertIn("Connection lost", result["delete_error"])
+        self.assertTrue(fake.closed)
+
+    def test_long_retry_list_is_kept_not_dropped(self):
+        old = [f"MY_F{n:04d}" for n in range(1, 31)]
+        replies = [art("image_added", content_id="MY_F0099"), art("artmode_status", value="on")]
+        fake = FakeTV(replies + [art("image_deleted")] * tv.MAX_DELETES)
+        result = tv.publish("10.0.0.5", "T0", b"JPEG", old, connector=fake)
+        self.assertEqual(result["pending"], old[tv.MAX_DELETES:])
+        self.assertIsNone(result["delete_error"])
+
     def test_refused_pairing_raises(self):
         fake = FakeTV([])
         fake.replies = [json.dumps({"event": "ms.channel.unauthorized"})]
