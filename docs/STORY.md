@@ -75,6 +75,18 @@ but my 2019 Frame opens Art Mode without any token. My first version thought
 this was an error. The logs showed the real reason, and the fix was to accept
 it as a normal case.
 
+## The TV that switched off the news
+
+One evening I was watching the news on the kitchen TV. Suddenly the picture
+went away and the painting appeared. It happened exactly at a scheduled
+update: my integration had told the TV to show the new picture, and the TV
+did it, even in the middle of the news.
+
+In my tests the TV was always already in Art Mode, so I never saw this. Now,
+before showing the picture, the integration asks the TV if Art Mode is on. If
+somebody is watching TV, the new picture is only set as the current artwork
+and appears later, when the TV goes back to Art Mode. This was version 1.1.1.
+
 ## Why I removed the clock
 
 At first I had a clock in the picture. It looked useful.

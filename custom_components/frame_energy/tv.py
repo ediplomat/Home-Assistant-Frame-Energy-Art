@@ -4,9 +4,10 @@ Written for this project from the publicly known Art Mode WebSocket protocol
 (tested shape: Art API used by the 2019 Frame). Blocking code: call it from
 Home Assistant's executor, never from the event loop.
 
-Only three operations are needed:
+Only four operations are needed:
   upload  -> the TV must confirm with ``image_added``, otherwise we raise
-  select  -> show the uploaded image
+  status  -> is Art Mode on right now? (live TV must never be interrupted)
+  select  -> make the uploaded image current; switch to it only in Art Mode
   delete  -> remove ONE image by its content_id (never "delete all")
 """
 from __future__ import annotations
@@ -134,8 +135,21 @@ class FrameClient:
             raise FrameError("TV confirmed the upload without a content_id")
         return str(content_id)
 
-    def select(self, content_id: str) -> None:
-        self.conn.send(request_message({"request": "select_image", "content_id": content_id, "show": True}))
+    def art_mode_on(self) -> bool:
+        """True only if the TV says it is showing Art Mode right now.
+
+        Unknown counts as "no": interrupting live TV is worse than waiting
+        for the next update.
+        """
+        self.conn.send(request_message({"request": "get_artmode_status", "id": str(uuid.uuid4())}))
+        try:
+            return wait_for(self.conn, {"artmode_status"}, max_messages=10).get("value") == "on"
+        except FrameError:
+            return False
+
+    def select(self, content_id: str, show: bool) -> None:
+        """Make the image the current artwork; ``show`` switches the screen to it."""
+        self.conn.send(request_message({"request": "select_image", "content_id": content_id, "show": show}))
 
     def delete(self, content_id: str) -> None:
         """Delete exactly one image. Callers pass only IDs this project uploaded."""
@@ -164,7 +178,8 @@ def publish(host: str, token: str | None, jpeg: bytes, old_ids: list[str], conne
     """
     with FrameClient(host, token, connector) as client:
         content_id = client.upload(jpeg)
-        client.select(content_id)
+        # Never switch away from live TV: show now only if Art Mode is already on.
+        client.select(content_id, show=client.art_mode_on())
         pending, delete_error = [], None
         for old in old_ids:
             if old == content_id:

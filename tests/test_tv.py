@@ -53,17 +53,35 @@ class UploaderTests(unittest.TestCase):
         self.assertEqual(frame[2 + size:], b"JPEG")
 
     def test_publish_uploads_shows_and_deletes_only_old_ids(self):
-        fake = FakeTV([art("image_added", content_id="MY_F0012"), art("image_deleted"), art("image_deleted")])
+        fake = FakeTV([art("image_added", content_id="MY_F0012"), art("artmode_status", value="on"),
+                       art("image_deleted"), art("image_deleted")])
         result = tv.publish("10.0.0.5", "T0", b"JPEG", ["MY_F0011", "MY_F0010"], connector=fake)
         self.assertEqual(result["content_id"], "MY_F0012")
         self.assertEqual(result["pending"], [])
         self.assertEqual(result["token"], "T1")
         self.assertIn("token=T0", fake.url)
         requests = [m["request"] for m in fake.sent]
-        self.assertEqual(requests, ["select_image", "delete_image_list", "delete_image_list"])
-        deleted = [m["content_id_list"][0]["content_id"] for m in fake.sent[1:]]
+        self.assertEqual(requests, ["get_artmode_status", "select_image", "delete_image_list", "delete_image_list"])
+        self.assertTrue(fake.sent[1]["show"])
+        deleted = [m["content_id_list"][0]["content_id"] for m in fake.sent[2:]]
         self.assertEqual(deleted, ["MY_F0011", "MY_F0010"])
         self.assertTrue(fake.closed)
+
+    def test_live_tv_is_not_interrupted(self):
+        fake = FakeTV([art("image_added", content_id="MY_F0012"), art("artmode_status", value="off"),
+                       art("image_deleted")])
+        result = tv.publish("10.0.0.5", "T0", b"JPEG", ["MY_F0011"], connector=fake)
+        select = next(m for m in fake.sent if m["request"] == "select_image")
+        self.assertEqual(select["content_id"], "MY_F0012")
+        self.assertFalse(select["show"])
+        self.assertEqual(result["pending"], [])
+
+    def test_unknown_art_mode_does_not_switch(self):
+        fake = FakeTV([art("image_added", content_id="MY_F0012")])
+        result = tv.publish("10.0.0.5", "T0", b"JPEG", [], connector=fake)
+        select = next(m for m in fake.sent if m["request"] == "select_image")
+        self.assertFalse(select["show"])
+        self.assertEqual(result["content_id"], "MY_F0012")
 
     def test_unconfirmed_upload_raises(self):
         fake = FakeTV([])
@@ -76,7 +94,7 @@ class UploaderTests(unittest.TestCase):
             tv.publish("10.0.0.5", "T0", b"JPEG", [], connector=FakeTV([art("error", error_code="-1")]))
 
     def test_failed_delete_is_kept_for_retry(self):
-        fake = FakeTV([art("image_added", content_id="MY_F0012")])
+        fake = FakeTV([art("image_added", content_id="MY_F0012"), art("artmode_status", value="on")])
         result = tv.publish("10.0.0.5", "T0", b"JPEG", ["MY_F0011"], connector=fake)
         self.assertEqual(result["pending"], ["MY_F0011"])
         self.assertIsNotNone(result["delete_error"])

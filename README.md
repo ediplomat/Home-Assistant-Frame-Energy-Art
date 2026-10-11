@@ -30,7 +30,8 @@ Every update:
 1. reads the current values from Home Assistant;
 2. paints them onto the background picture (1920 × 1080 JPEG);
 3. sends the picture to the TV and waits until the TV confirms it;
-4. shows it in Art Mode;
+4. shows it if the TV is in Art Mode. If you are watching TV, it is only
+   set as the current artwork and appears when you go back to Art Mode;
 5. deletes only the previous picture made by this project.
 
 Your own photos and artworks on the TV are never touched. If the TV does not
