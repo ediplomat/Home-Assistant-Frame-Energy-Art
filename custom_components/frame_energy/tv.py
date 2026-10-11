@@ -90,6 +90,7 @@ class FrameClient:
         self.token = token
         self._connector = connector
         self.conn = None
+        self.ready = False
 
     def __enter__(self):
         connect = self._connector
@@ -117,6 +118,7 @@ class FrameClient:
                 self.conn.close()
                 raise FrameError("Connection was refused on the TV")
             elif event == "ms.channel.ready":
+                self.ready = True
                 break
         self.conn.settimeout(REPLY_TIMEOUT)
         return self
@@ -142,11 +144,15 @@ class FrameClient:
 
 
 def pair(host: str, connector=None) -> str:
-    """Connect once so the TV shows its Allow prompt; return the token."""
+    """Connect once; the TV may ask "Allow" and issue a token.
+
+    Some models (for example the 2019 Frame) open the Art Mode channel without
+    any token. That is a successful pairing too: an empty token is returned.
+    """
     with FrameClient(host, None, connector) as client:
-        if not client.token:
-            raise FrameError("The TV did not issue a token")
-        return client.token
+        if not client.ready:
+            raise FrameError("The TV did not open the Art Mode channel")
+        return client.token or ""
 
 
 def publish(host: str, token: str | None, jpeg: bytes, old_ids: list[str], connector=None) -> dict:

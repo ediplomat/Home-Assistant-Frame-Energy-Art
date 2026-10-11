@@ -88,5 +88,18 @@ class UploaderTests(unittest.TestCase):
             tv.pair("10.0.0.5", connector=fake)
 
 
+    def test_pairing_without_token_is_ok(self):
+        fake = FakeTV([])
+        fake.replies = [json.dumps({"event": "ms.channel.connect", "data": {}}), json.dumps({"event": "ms.channel.ready"})]
+        self.assertEqual(tv.pair("10.0.0.5", connector=fake), "")
+        self.assertNotIn("token=", fake.url)
+
+    def test_pairing_without_ready_fails(self):
+        fake = FakeTV([])
+        fake.replies = [json.dumps({"event": "ms.channel.connect", "data": {}})] + [json.dumps({"event": "other"})] * 9
+        with self.assertRaises(tv.FrameError):
+            tv.pair("10.0.0.5", connector=fake)
+
+
 if __name__ == "__main__":
     unittest.main()
