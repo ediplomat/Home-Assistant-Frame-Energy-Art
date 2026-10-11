@@ -4,7 +4,7 @@ A local Home Assistant integration that puts solar generation, home consumption,
 battery levels, electric vehicles and weather onto a Tuscan painting for Samsung
 The Frame's Art Mode.
 
-Created by [ediplomat](https://github.com/ediplomat).
+Created by **Ilja Dulushkov** ([@ediplomat](https://github.com/ediplomat)), MEng Autonomous Robotics student at NMITE, Hereford.
 
 ![Example artwork with fictional data](docs/demo.jpg)
 
