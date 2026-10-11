@@ -169,6 +169,12 @@ The tests use a fake TV, so they do not need a real television.
 Shared as is, from one home setup. Issues and pull requests are welcome, but
 there is no promise of support or of compatibility with other TV models.
 
+## Support the project
+
+Frame Energy Art is free and open source. If it is useful for you, you can
+[buy me a coffee on Ko-fi](https://ko-fi.com/ediplomat). It helps me test it
+on more TVs. Thank you!
+
 ## Licence and assets
 
 Code and documentation: MIT, see [LICENSE](LICENSE).
