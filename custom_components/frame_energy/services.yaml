@@ -1,0 +1,3 @@
+render:
+  name: Generate and send energy art
+  description: Read current sensors, create the JPG atomically, then ask Samsung Frame Art to upload it.

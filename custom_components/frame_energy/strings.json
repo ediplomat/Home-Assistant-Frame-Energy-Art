@@ -1,0 +1,32 @@
+{
+  "title": "Frame Energy Art",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Frame Energy Art",
+        "description": "Local live artwork for the existing Samsung Frame Art integration. Entity IDs can be changed below.",
+        "data": {
+          "background_path": "Clean artwork path",
+          "output_path": "Generated JPG path",
+          "solar": "Solar power",
+          "home": "Home power",
+          "battery": "Home battery percentage",
+          "battery_charge": "Battery charging power",
+          "battery_discharge": "Battery discharging power",
+          "tesla": "Tesla percentage",
+          "tesla_power": "Tesla charging power",
+          "hyundai": "IONIQ 6 percentage",
+          "hyundai_power": "IONIQ 6 charging power",
+          "weather": "Weather"
+        }
+      }
+    },
+    "error": {
+      "missing_background": "The clean background file does not exist",
+      "same_path": "Output must not overwrite the background"
+    },
+    "abort": {
+      "already_configured": "Already configured"
+    }
+  }
+}
