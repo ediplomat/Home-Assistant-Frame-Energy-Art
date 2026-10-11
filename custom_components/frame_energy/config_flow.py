@@ -1,4 +1,5 @@
 """Local-only configuration; the TV token comes from on-screen pairing."""
+import logging
 from pathlib import Path
 
 import voluptuous as vol
@@ -8,6 +9,8 @@ from homeassistant.core import callback
 from . import tv
 from .const import CONF_TV_HOST, CONF_TV_TOKEN, DEFAULTS, DOMAIN
 from .render import LABEL_DEFAULTS
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _schema(current: dict) -> vol.Schema:
@@ -54,7 +57,8 @@ class FrameEnergyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 token = await self.hass.async_add_executor_job(tv.pair, self._config[CONF_TV_HOST])
-            except tv.FrameError:
+            except tv.FrameError as exc:
+                _LOGGER.warning("Pairing with the TV failed: %s", exc)
                 errors["base"] = "pairing_failed"
             else:
                 return self.async_create_entry(title="Frame Energy Art", data={**self._config, CONF_TV_TOKEN: token})
@@ -97,7 +101,8 @@ class FrameEnergyOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             try:
                 token = await self.hass.async_add_executor_job(tv.pair, self._options[CONF_TV_HOST])
-            except tv.FrameError:
+            except tv.FrameError as exc:
+                _LOGGER.warning("Pairing with the TV failed: %s", exc)
                 errors["base"] = "pairing_failed"
             else:
                 return self.async_create_entry(title="", data={**self._options, CONF_TV_TOKEN: token})
