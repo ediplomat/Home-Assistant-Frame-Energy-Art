@@ -102,6 +102,12 @@ only the date.
 Good design is not about adding as many features as possible. Sometimes
 removing something makes the project better.
 
+Later I understood that other people may want it differently. In version
+1.2.0 the update time came back as an option, off by default and small, above
+the date. In the same version the painting moved inside the integration, so
+it works right after installing, and people with one car or no car get a
+balanced picture without empty columns.
+
 ## What I learned
 
 This project was more than putting numbers on a TV. I had to:

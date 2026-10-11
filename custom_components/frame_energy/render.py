@@ -12,6 +12,9 @@ GOLD = "#c49631"
 # Darker than the sky so clouds stay readable on warm backgrounds yet look painted.
 CLOUD = "#8a8678"
 RIGHT_EDGE = 1900
+# Shipped inside the integration, so HACS users have a picture from the start.
+BUILTIN_BACKGROUND = Path(__file__).parent / "backgrounds" / "tuscan_background.jpg"
+QUIET = "#6f6c5c"  # softer than INK, for the optional update time
 LABEL_DEFAULTS = {
     "vehicle1_name": "Tesla",
     "vehicle1_letter": "T",
@@ -104,11 +107,16 @@ def column_positions(count):
     return [round(first + COLUMN_GAP * i) for i in range(count)]
 
 
-def render(background, output, snapshot, forecast, now, labels=None, cars=None):
-    """``cars`` lists the enabled car keys ("tesla", "hyundai"); None means both."""
+def render(background, output, snapshot, forecast, now, labels=None, cars=None, show_update_time=False):
+    """``cars`` lists the enabled car keys ("tesla", "hyundai"); None means both.
+
+    An empty ``background`` uses the built-in painting. ``show_update_time``
+    adds a small "Updated HH:MM" under the date (off by default: the picture
+    should look like a painting, not a screen).
+    """
     labels = {**LABEL_DEFAULTS, **{k: v for k, v in (labels or {}).items() if v}}
     enabled = [car for car in CARS if cars is None or car[0] in cars]
-    with Image.open(background) as source:
+    with Image.open(background or BUILTIN_BACKGROUND) as source:
         im = ImageOps.fit(source.convert("RGB"), (1920,1080), method=Image.Resampling.LANCZOS)
     d = ImageDraw.Draw(im)
     def text(x,y,value,size=26,anchor="mm",fill=INK,max_width=None):
@@ -117,6 +125,8 @@ def render(background, output, snapshot, forecast, now, labels=None, cars=None):
             size-=1
         d.text((x,y),str(value),font=load_font(size),fill=fill,anchor=anchor)
     text(75,204,f"{now:%A}, {now.day} {now:%B %Y}",29,"lt",max_width=485)
+    if show_update_time:
+        text(75,166,f"Updated {now:%H:%M}",22,"lt",fill=QUIET)  # above the date: clear sky, away from the trees
     names=[("Solar generation","solar"),("Home consumption","home"),("Home battery","battery")]
     names+=[(labels[f"{prefix}_name"],key) for key,prefix,_ in enabled]
     xs=column_positions(len(names))

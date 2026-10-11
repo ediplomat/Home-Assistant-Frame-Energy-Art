@@ -76,17 +76,12 @@ restart Home Assistant.
 
 ### Background picture
 
-HACS installs only the integration, not the picture. Do this once:
+Nothing to do: the Tuscan painting is built into the integration. Leave the
+background field empty and it is used.
 
-1. Download
-   [tuscan_background.jpg](https://github.com/ediplomat/Home-Assistant-Frame-Energy-Art/raw/main/assets/tuscan_background.jpg)
-   from this repository, or use your own picture (1920 × 1080 or larger).
-2. In Home Assistant open the `media` folder, for example with the
-   **File editor** or **Samba share** add-on.
-3. Create the folder `frame_assets` and put the picture there, so the path is
-   `/media/frame_assets/tuscan_background.jpg`.
-
-You can use another path; then enter it in the setup.
+To use your own picture (1920 × 1080 or larger), copy it to Home Assistant,
+for example to `/media/frame_assets/my_picture.jpg` with the **File editor**
+or **Samba share** add-on, and enter that path in the setup.
 
 ## Setup
 
@@ -118,6 +113,10 @@ Everything can be changed later with **Configure** on the integration.
 **One car or no car:** leave the second car's sensors empty and its column is
 not drawn; the rest of the row is centred. Leave both empty if you have no
 electric car.
+
+**Update time:** off by default, so the picture looks like a painting. Turn on
+**Show update time** to see a small "Updated 21:15" above the date. It tells
+you at a glance that the picture is fresh.
 
 Missing or wrong values show a dash instead of breaking the picture. Values
 are shown as Home Assistant has them; the integration does not check how

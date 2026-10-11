@@ -7,7 +7,7 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 
 from . import tv
-from .const import CAR_KEYS, CONF_TV_HOST, CONF_TV_TOKEN, DEFAULTS, DOMAIN
+from .const import CONF_SHOW_UPDATE_TIME, CONF_TV_HOST, CONF_TV_TOKEN, DEFAULTS, DOMAIN, OPTIONAL_KEYS
 from .render import LABEL_DEFAULTS
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,28 +16,32 @@ _LOGGER = logging.getLogger(__name__)
 def _schema(current: dict) -> vol.Schema:
     fields = {}
     for key, value in DEFAULTS.items():
-        if key in CAR_KEYS:
+        if key in OPTIONAL_KEYS:
             # Optional with a suggested value (not a default), so the field can be cleared.
             fields[vol.Optional(key, description={"suggested_value": current.get(key, value)})] = str
         else:
             fields[vol.Required(key, default=current.get(key, value))] = str
     for key, value in LABEL_DEFAULTS.items():
         fields[vol.Optional(key, default=current.get(key, value))] = str
+    fields[vol.Optional(CONF_SHOW_UPDATE_TIME, default=bool(current.get(CONF_SHOW_UPDATE_TIME, False)))] = bool
     fields[vol.Required(CONF_TV_HOST, default=current.get(CONF_TV_HOST, ""))] = str
     return vol.Schema(fields)
 
 
-def _with_cars(user_input: dict) -> dict:
-    """A cleared car field is missing from the form result: store it as empty."""
-    return {**user_input, **{key: user_input.get(key, "").strip() for key in CAR_KEYS}}
+def _with_optional(user_input: dict) -> dict:
+    """A cleared optional field is missing from the form result: store it as empty."""
+    return {**user_input, **{key: user_input.get(key, "").strip() for key in OPTIONAL_KEYS}}
 
 
 async def _validate(hass, config: dict) -> dict:
     errors = {}
-    exists = await hass.async_add_executor_job(Path(config["background_path"]).is_file)
+    background = config.get("background_path", "")
+    if not background:
+        return errors  # the built-in painting
+    exists = await hass.async_add_executor_job(Path(background).is_file)
     if not exists:
         errors["background_path"] = "missing_background"
-    elif config["background_path"] == config["output_path"]:
+    elif background == config["output_path"]:
         errors["output_path"] = "same_path"
     return errors
 
@@ -53,7 +57,7 @@ class FrameEnergyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._abort_if_unique_id_configured()
         errors = {}
         if user_input is not None:
-            config = {**DEFAULTS, **_with_cars(user_input)}
+            config = {**DEFAULTS, **_with_optional(user_input)}
             config[CONF_TV_HOST] = config.get(CONF_TV_HOST, "").strip()
             errors = await _validate(self.hass, config)
             if not config[CONF_TV_HOST]:
@@ -61,7 +65,7 @@ class FrameEnergyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not errors:
                 self._config = config
                 return await self.async_step_pair()
-        return self.async_show_form(step_id="user", data_schema=_schema(_with_cars(user_input) if user_input else {}), errors=errors)
+        return self.async_show_form(step_id="user", data_schema=_schema(_with_optional(user_input) if user_input else {}), errors=errors)
 
     async def async_step_pair(self, user_input=None):
         errors = {}
@@ -95,7 +99,7 @@ class FrameEnergyOptionsFlow(config_entries.OptionsFlow):
         current = {**self.config_entry.data, **self.config_entry.options}
         errors = {}
         if user_input is not None:
-            options = {**_with_cars(user_input), CONF_TV_HOST: user_input.get(CONF_TV_HOST, "").strip()}
+            options = {**_with_optional(user_input), CONF_TV_HOST: user_input.get(CONF_TV_HOST, "").strip()}
             errors = await _validate(self.hass, options)
             if not options[CONF_TV_HOST]:
                 errors[CONF_TV_HOST] = "missing_host"
@@ -105,7 +109,7 @@ class FrameEnergyOptionsFlow(config_entries.OptionsFlow):
                     return await self.async_step_pair()
                 options[CONF_TV_TOKEN] = current.get(CONF_TV_TOKEN)
                 return self.async_create_entry(title="", data=options)
-        return self.async_show_form(step_id="init", data_schema=_schema(_with_cars(user_input) if user_input else current), errors=errors)
+        return self.async_show_form(step_id="init", data_schema=_schema(_with_optional(user_input) if user_input else current), errors=errors)
 
     async def async_step_pair(self, user_input=None):
         errors = {}

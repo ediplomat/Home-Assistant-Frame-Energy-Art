@@ -10,7 +10,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from . import tv
-from .const import CONF_TV_HOST, CONF_TV_TOKEN, DOMAIN, ENTITY_DEFAULTS, STORAGE_VERSION
+from .const import CONF_SHOW_UPDATE_TIME, CONF_TV_HOST, CONF_TV_TOKEN, DOMAIN, ENTITY_DEFAULTS, STORAGE_VERSION
 from .render import LABEL_DEFAULTS, render
 
 _LOGGER = logging.getLogger(__name__)
@@ -62,7 +62,8 @@ async def async_setup_entry(hass, entry):
             try:
                 labels = {key: config.get(key) for key in LABEL_DEFAULTS}
                 cars = [key for key in ("tesla", "hyundai") if config.get(key)]  # empty field = no such car
-                await hass.async_add_executor_job(render, config["background_path"], config["output_path"], snapshot, forecast, now, labels, cars)
+                await hass.async_add_executor_job(render, config.get("background_path"), config["output_path"], snapshot, forecast,
+                                                  now, labels, cars, bool(config.get(CONF_SHOW_UPDATE_TIME)))
                 runtime["last_generated"] = dt_util.utcnow()
                 runtime["error"] = None
                 async_dispatcher_send(hass, f"{DOMAIN}_updated")

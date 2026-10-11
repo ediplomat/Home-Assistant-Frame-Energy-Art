@@ -4,7 +4,7 @@ CONF_TV_TOKEN = "tv_token"
 STORAGE_VERSION = 1
 
 PATH_DEFAULTS = {
-    "background_path": "/media/frame_assets/tuscan_background.jpg",
+    "background_path": "",  # empty = the painting built into the integration
     "output_path": "/media/frame/frame_energy_live.jpg",
 }
 ENTITY_DEFAULTS = {
@@ -22,3 +22,6 @@ ENTITY_DEFAULTS = {
 DEFAULTS = {**PATH_DEFAULTS, **ENTITY_DEFAULTS}
 # Car sensors may be left empty: an empty first/second car is not drawn.
 CAR_KEYS = ("tesla", "tesla_power", "hyundai", "hyundai_power")
+# Fields that may be cleared in the setup form.
+OPTIONAL_KEYS = ("background_path", *CAR_KEYS)
+CONF_SHOW_UPDATE_TIME = "show_update_time"
