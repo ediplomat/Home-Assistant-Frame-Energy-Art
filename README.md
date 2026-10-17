@@ -87,6 +87,11 @@ or **Samba share** add-on, and enter that path in the setup.
 
 ## Setup
 
+0. **On the TV first:** open **Settings → General → External Device Manager →
+   Device Connection Manager** and set **Access Notification** to
+   **First Time Only**. With **Always**, the TV asks "Allow" on every
+   connection, the message disappears after a few seconds, and the updates
+   fail. (Menu names can differ a little between models.)
 1. **Settings → Devices & services → Add integration → Frame Energy Art.**
 2. Choose your sensors, the names shown in the picture and the TV's IP address.
    Give the TV a fixed IP address in your router.
@@ -165,9 +170,15 @@ Attributes:
   status sensor. If it is old, run `frame_energy.render` once from Developer
   tools and read the `error` attribute. While the TV is off, updates fail.
   They work again when the TV is back.
-- **"The TV took too long to answer":** look at the TV. If it shows an
-  **Allow** message, press Allow. Until then the TV keeps the connection open
-  but does not answer, and every update stops after two minutes.
+- **"The TV took too long to answer":** the TV is waiting for **Allow**. On
+  the TV, open **Settings → General → External Device Manager → Device
+  Connection Manager**:
+  - set **Access Notification** to **First Time Only** (with **Always** the
+    TV asks on every update, and the message is gone after a few seconds);
+  - in **Device List**, check that **FrameEnergyArt** is set to **Allow**.
+
+  Until then the TV keeps the connection open but does not answer, and every
+  update stops after two minutes.
 - **Missing background:** check the path and that the file exists.
 - **Dashes instead of numbers:** check entity IDs, availability and units.
 - **No forecast:** the weather entity must support daily forecasts.
