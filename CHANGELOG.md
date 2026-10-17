@@ -3,6 +3,15 @@
 All notable changes to Frame Energy Art. Versions 1.1.0 to 1.2.0 were released
 on 11 and 12 October 2026.
 
+## 1.3.2
+
+### Fixed
+
+- **List TV pictures** now waits up to 60 seconds for the answer, because
+  older Frames can be slow.
+- If the TV never answers, the log now shows what the TV sent instead.
+- **Delete TV pictures** now writes the result for every ID to the log.
+
 ## 1.3.1
 
 ### New

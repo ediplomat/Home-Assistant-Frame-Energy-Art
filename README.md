@@ -166,7 +166,8 @@ after an update that was cut off):
   never deleted unless you enter their IDs.
 
 Run them from **Developer tools → Actions** and press **Perform action**; the
-answer is shown below.
+answer is shown below. The results of both actions are also written to the
+Home Assistant log (Settings → System → Logs).
 
 If the TV refuses to delete an old picture ten times in a row (often because
 it is already gone), the integration stops trying and writes a warning to the

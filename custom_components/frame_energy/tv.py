@@ -14,16 +14,20 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import ssl
 import threading
 import time
 import uuid
+
+_LOGGER = logging.getLogger(__name__)
 
 CLIENT_NAME = "FrameEnergyArt"
 PORT = 8002
 CONNECT_TIMEOUT = 10
 PAIRING_TIMEOUT = 35  # time for a person to press "Allow" on the TV
 REPLY_TIMEOUT = 15
+LIST_REPLY_TIMEOUT = 60  # older Frames can be slow to send the picture list
 TOTAL_TIMEOUT = 120  # the whole talk with the TV must end within this time
 MAX_DELETES = 5  # old images tried per update; the rest wait for the next one
 MY_PHOTOS = "MY-C0002"  # Art Mode category of uploaded pictures
@@ -81,28 +85,47 @@ def time_left(deadline: float | None) -> float | None:
     return left
 
 
-def wait_for(conn, events: set[str], max_messages: int = 20, deadline: float | None = None) -> dict:
+def skipped_name(raw, data: dict | None) -> str:
+    """Short name of a message we were not waiting for (for the log and errors)."""
+    if data:
+        return str(data.get("event"))
+    try:
+        return str(json.loads(raw).get("event"))
+    except (TypeError, ValueError, AttributeError):
+        return "unreadable message"
+
+
+def wait_for(conn, events: set[str], max_messages: int = 20, deadline: float | None = None,
+             reply_timeout: float = REPLY_TIMEOUT) -> dict:
     """Read until one of ``events`` (or an error) arrives; raise otherwise.
 
-    Every read has its own timeout, but a TV that keeps sending other
-    messages could still hold us for minutes, so ``deadline`` limits the total.
+    Every read has its own timeout (``reply_timeout``), but a TV that keeps
+    sending other messages could still hold us for minutes, so ``deadline``
+    limits the total. Messages we did not wait for are logged, and the last
+    few names are added to the error, so we can see what the TV really sent.
     """
+    skipped: list[str] = []
+
+    def got() -> str:
+        return f" (got: {skipped[-5:]})" if skipped else ""
+
     for _ in range(max_messages):
         left = time_left(deadline)
         if left is not None:
-            conn.settimeout(min(REPLY_TIMEOUT, left))
+            conn.settimeout(min(reply_timeout, left))
         try:
             raw = conn.recv()
         except Exception as exc:  # timeout or closed socket
-            raise FrameError(f"No reply from TV ({exc})") from exc
+            raise FrameError(f"No reply from TV ({exc}){got()}") from exc
         data = art_event(raw)
-        if not data:
-            continue
-        if data.get("event") == "error":
+        if data and data.get("event") == "error":
             raise FrameError(f"TV error: {data}")
-        if data.get("event") in events:
+        if data and data.get("event") in events:
             return data
-    raise FrameError(f"TV did not send {sorted(events)}")
+        text = raw if isinstance(raw, str) else repr(raw)
+        _LOGGER.debug("TV message skipped while waiting for %s: %s", sorted(events), text[:300])
+        skipped.append(skipped_name(raw, data))
+    raise FrameError(f"TV did not send {sorted(events)}{got()}")
 
 
 class FrameClient:
@@ -234,13 +257,17 @@ class FrameClient:
         """Pictures the TV keeps in one Art Mode category (``MY-C0002`` = My Photos)."""
         self._arm()
         self.conn.send(request_message({"request": "get_content_list", "category": category, "id": str(uuid.uuid4())}))
-        data = wait_for(self.conn, {"content_list"}, deadline=self.deadline)
-        items = data.get("content_list") or []
+        data = wait_for(self.conn, {"content_list"}, max_messages=50, deadline=self.deadline,
+                        reply_timeout=LIST_REPLY_TIMEOUT)
+        # The list is normally under "content_list"; accept "data" or "items" too.
+        items = data.get("content_list") or data.get("data") or data.get("items") or []
         if isinstance(items, str):
             try:
                 items = json.loads(items)
             except ValueError as exc:
                 raise FrameError("The TV sent a picture list that could not be read") from exc
+        if not isinstance(items, list):
+            raise FrameError("The TV sent a picture list that could not be read")
         return [item for item in items if isinstance(item, dict)]
 
 
@@ -297,6 +324,8 @@ def list_images(host: str, token: str | None, connector=None) -> dict:
     """Read the pictures in My Photos. Nothing is changed on the TV."""
     with FrameClient(host, token, connector) as client:
         items = client.content_list()
+        _LOGGER.warning("TV pictures in My Photos (%d): %s", len(items),
+                        ", ".join(f"{i.get('content_id')} ({i.get('image_date')})" for i in items) or "none")
         return {"images": items, "token": client.token}
 
 
@@ -313,6 +342,8 @@ def delete_images(host: str, token: str | None, content_ids: list[str], connecto
                 client.delete(content_id)
             except FrameError as exc:
                 failed[content_id] = str(exc)
+                _LOGGER.warning("TV refused to delete %s: %s", content_id, exc)
             else:
                 deleted.append(content_id)
+                _LOGGER.warning("Deleted TV picture %s", content_id)
         return {"deleted": deleted, "failed": failed, "token": client.token}

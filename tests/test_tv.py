@@ -278,6 +278,48 @@ class UploaderTests(unittest.TestCase):
         self.assertEqual(fake.sent[0]["category"], "MY-C0002")
         self.assertTrue(fake.closed)
 
+    def test_list_images_skips_unrelated_art_events_first(self):
+        items = [{"content_id": "MY_F0001", "image_date": "2026:10:17 19:00:00"}]
+        fake = FakeTV([art("other_event"), art("ready_to_use"), art("content_list", content_list=json.dumps(items))])
+        with self.assertLogs(tv._LOGGER.name, "WARNING") as logs:
+            result = tv.list_images("10.0.0.5", "T0", connector=fake)
+        self.assertEqual(result["images"], items)
+        self.assertIn("MY_F0001 (2026:10:17 19:00:00)", logs.output[0])
+
+    def test_list_images_error_names_the_events_that_arrived(self):
+        fake = FakeTV([art("other_event"), art("ready_to_use")])
+        with self.assertRaises(tv.FrameError) as ctx:
+            tv.list_images("10.0.0.5", "T0", connector=fake)
+        self.assertIn("No reply from TV", str(ctx.exception))
+        self.assertIn("other_event", str(ctx.exception))
+        self.assertIn("ready_to_use", str(ctx.exception))
+
+    def test_wait_for_error_names_events_when_the_message_limit_is_hit(self):
+        fake = FakeTV([art("other_event")] * 3)
+        fake.recv(), fake.recv()  # skip the handshake replies
+        with self.assertRaises(tv.FrameError) as ctx:
+            tv.wait_for(fake, {"content_list"}, max_messages=3)
+        self.assertIn("TV did not send ['content_list'] (got: ['other_event'", str(ctx.exception))
+
+    def test_list_images_uses_the_longer_read_timeout(self):
+        class RecordingTV(FakeTV):
+            timeouts = []
+
+            def settimeout(self, value):
+                self.timeouts.append(value)
+
+        fake = RecordingTV([art("content_list", content_list="[]")])
+        tv.list_images("10.0.0.5", "T0", connector=fake)
+        self.assertIn(60, fake.timeouts)
+
+    def test_delete_images_logs_one_line_per_id(self):
+        fake = FakeTV([art("error", error_code="-7"), art("image_deleted")])
+        with self.assertLogs(tv._LOGGER.name, "WARNING") as logs:
+            tv.delete_images("10.0.0.5", "T0", ["MY_F0481", "MY_F0496"], connector=fake)
+        self.assertEqual(len(logs.output), 2)
+        self.assertIn("TV refused to delete MY_F0481", logs.output[0])
+        self.assertIn("Deleted TV picture MY_F0496", logs.output[1])
+
     def test_delete_images_deletes_only_named_ids_and_goes_on_after_a_refusal(self):
         fake = FakeTV([art("error", error_code="-7"), art("image_deleted")])
         result = tv.delete_images("10.0.0.5", "T0", ["MY_F0481", "MY_F0496"], connector=fake)
