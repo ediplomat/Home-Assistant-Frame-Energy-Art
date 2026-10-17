@@ -179,6 +179,12 @@ Attributes:
 
   Until then the TV keeps the connection open but does not answer, and every
   update stops after two minutes.
+
+  **No Allow message on the screen?** Then the Art Mode service inside the TV
+  is probably stuck: the TV accepts the connection but never answers. Restart
+  the TV: hold the power button on the remote for about 5 seconds, until the
+  Samsung logo appears. Your pictures stay on the TV. The next update works
+  again.
 - **Missing background:** check the path and that the file exists.
 - **Dashes instead of numbers:** check entity IDs, availability and units.
 - **No forecast:** the weather entity must support daily forecasts.
