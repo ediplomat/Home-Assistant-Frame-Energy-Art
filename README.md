@@ -71,8 +71,10 @@ year, even if it works.
 
 ### Manual
 
-Copy `custom_components/frame_energy` to `/config/custom_components/` and
-restart Home Assistant.
+Download `frame_energy.zip` from the latest
+[release](https://github.com/ediplomat/Home-Assistant-Frame-Energy-Art/releases),
+unpack it to `/config/custom_components/frame_energy/` and restart Home
+Assistant.
 
 ### Background picture
 
@@ -124,14 +126,23 @@ fresh they are.
 
 ## Automatic updates
 
-After a successful manual test, add
-[examples/automation.yaml](examples/automation.yaml) in the automation YAML
-editor. It updates the picture every 15 minutes and one minute after Home
-Assistant starts. Nothing is scheduled automatically.
+The picture updates by itself every 15 minutes, and one minute after Home
+Assistant starts. No automation is needed.
 
-The example uses `mode: restart`. If one update ever gets stuck, the next one
-ends it and starts fresh. With `mode: single` a stuck update would block all
-later ones without any message.
+Change it with **Configure → Update the picture by itself**: every 5, 10, 15,
+30 or 60 minutes, or **Manual**. Updates run on the clock (for every 15
+minutes: at :00, :15, :30 and :45). Every update saves a new picture on the
+TV and deletes the old one, so 15 minutes is a good balance. The numbers on
+the picture do not change much faster.
+
+**Your own automation:** choose **Manual** and call `frame_energy.render`
+yourself, for example from
+[examples/automation.yaml](examples/automation.yaml). If you keep an old
+automation and the built-in updates on, nothing breaks: an update is skipped
+when a picture was made less than half an interval ago. Still, it is cleaner
+to turn one of them off.
+
+If you use your own automation, use `mode: restart`, as in the example.
 
 ## Status sensor
 
@@ -152,9 +163,11 @@ Attributes:
   asks, press **Allow** within 30 seconds.
 - **The picture stopped updating:** look at `last_upload_confirmed` on the
   status sensor. If it is old, run `frame_energy.render` once from Developer
-  tools and read the `error` attribute. If your automation uses
-  `mode: single`, change it to `mode: restart`, as in the example. While the
-  TV is off, updates fail. They work again when the TV is back.
+  tools and read the `error` attribute. While the TV is off, updates fail.
+  They work again when the TV is back.
+- **"The TV took too long to answer":** look at the TV. If it shows an
+  **Allow** message, press Allow. Until then the TV keeps the connection open
+  but does not answer, and every update stops after two minutes.
 - **Missing background:** check the path and that the file exists.
 - **Dashes instead of numbers:** check entity IDs, availability and units.
 - **No forecast:** the weather entity must support daily forecasts.

@@ -24,7 +24,11 @@
           "vehicle2_name": "Second vehicle name",
           "vehicle2_letter": "Second vehicle monogram (1–2 letters)",
           "location_name": "Text under the weather (e.g. your village)",
-          "show_update_time": "Show update time under the date"
+          "show_update_time": "Show update time under the date",
+          "update_interval": "Update the picture by itself"
+        },
+        "data_description": {
+          "update_interval": "Choose Manual if you update the picture only with your own automation (frame_energy.render)."
         }
       },
       "pair": {
@@ -66,7 +70,11 @@
           "vehicle2_name": "Second vehicle name",
           "vehicle2_letter": "Second vehicle monogram (1–2 letters)",
           "location_name": "Text under the weather (e.g. your village)",
-          "show_update_time": "Show update time under the date"
+          "show_update_time": "Show update time under the date",
+          "update_interval": "Update the picture by itself"
+        },
+        "data_description": {
+          "update_interval": "Choose Manual if you update the picture only with your own automation (frame_energy.render)."
         }
       },
       "pair": {
@@ -79,6 +87,18 @@
       "same_path": "Output must not overwrite the background",
       "pairing_failed": "The TV did not open the connection. Check the IP address and that the TV is on. If the TV asks, choose Allow.",
       "missing_host": "Enter the IP address of the TV"
+    }
+  },
+  "selector": {
+    "update_interval": {
+      "options": {
+        "5": "Every 5 minutes",
+        "10": "Every 10 minutes",
+        "15": "Every 15 minutes (recommended)",
+        "30": "Every 30 minutes",
+        "60": "Every hour",
+        "manual": "Manual (only with your own automation)"
+      }
     }
   }
 }

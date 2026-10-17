@@ -15,6 +15,7 @@ from __future__ import annotations
 import base64
 import json
 import ssl
+import threading
 import time
 import uuid
 
@@ -106,6 +107,9 @@ def wait_for(conn, events: set[str], max_messages: int = 20, deadline: float | N
 class FrameClient:
     """One short-lived connection to the TV's Art Mode channel."""
 
+    # Replaceable in tests. The watchdog runs in its own thread.
+    timer_factory = threading.Timer
+
     def __init__(self, host: str, token: str | None, connector=None):
         self.host = host
         self.token = token
@@ -113,10 +117,44 @@ class FrameClient:
         self.conn = None
         self.ready = False
         self.deadline = None
+        self.timed_out = False
+        self._watchdog = None
 
     def _arm(self) -> None:
         """Give the next socket operation what is left of the total time."""
         self.conn.settimeout(min(REPLY_TIMEOUT, time_left(self.deadline)))
+
+    def _force_close(self) -> None:
+        """Called by the watchdog when the total time is over.
+
+        A socket timeout alone is not enough: a TV that keeps the connection
+        alive with ping frames (for example while it waits for "Allow") makes
+        every read wait again, so the read never ends. Closing the socket from
+        outside makes the blocked read fail at once.
+        """
+        self.timed_out = True
+        abort = getattr(self.conn, "abort", None)  # websocket-client: shuts the socket down
+        try:
+            if abort is not None:
+                abort()
+            self.conn.close()
+        except Exception:  # already closed or broken: nothing more to do
+            pass
+
+    def _stop_watchdog(self) -> None:
+        if self._watchdog is not None:
+            self._watchdog.cancel()
+            self._watchdog = None
+
+    def _fail(self, message: str, exc: Exception | None = None) -> FrameError:
+        self._stop_watchdog()
+        try:
+            self.conn.close()
+        except Exception:
+            pass
+        if self.timed_out:
+            message = "The TV took too long to answer (is an \"Allow\" message waiting on the TV?)"
+        return FrameError(f"{message} ({exc})" if exc and not self.timed_out else message)
 
     def __enter__(self):
         connect = self._connector
@@ -129,21 +167,22 @@ class FrameClient:
             timeout=CONNECT_TIMEOUT,
             sslopt={"cert_reqs": ssl.CERT_NONE},  # the TV uses a self-signed certificate
         )
+        self._watchdog = self.timer_factory(TOTAL_TIMEOUT, self._force_close)
+        self._watchdog.daemon = True
+        self._watchdog.start()
         for _ in range(10):
             try:
                 self.conn.settimeout(min(PAIRING_TIMEOUT, time_left(self.deadline)))
                 msg = json.loads(self.conn.recv())
             except Exception as exc:
-                self.conn.close()
-                raise FrameError(f"TV did not accept the connection ({exc})") from exc
+                raise self._fail("TV did not accept the connection", exc) from exc
             event = msg.get("event")
             if event == "ms.channel.connect":
                 new_token = (msg.get("data") or {}).get("token")
                 if new_token:
                     self.token = str(new_token)
             elif event == "ms.channel.unauthorized":
-                self.conn.close()
-                raise FrameError("Connection was refused on the TV")
+                raise self._fail("Connection was refused on the TV")
             elif event == "ms.channel.ready":
                 self.ready = True
                 break
@@ -151,8 +190,12 @@ class FrameClient:
         return self
 
     def __exit__(self, *exc):
+        self._stop_watchdog()
         if self.conn is not None:
-            self.conn.close()
+            try:
+                self.conn.close()
+            except Exception:
+                pass
 
     def upload(self, jpeg: bytes, matte: str = "none") -> str:
         self._arm()

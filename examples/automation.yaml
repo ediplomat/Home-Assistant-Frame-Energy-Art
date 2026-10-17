@@ -1,3 +1,5 @@
+# Only needed if you set "Update the picture by itself" to Manual.
+# By default the integration updates the picture every 15 minutes on its own.
 alias: Frame Energy Art update
 triggers:
   - trigger: time_pattern

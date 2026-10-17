@@ -70,7 +70,84 @@ class ChattyTV(FakeTV):
         return art("other_event")
 
 
+class FakeTimer:
+    """Stands for threading.Timer: records the watchdog instead of starting a thread."""
+
+    created = []
+
+    def __init__(self, interval, function):
+        self.interval, self.function = interval, function
+        self.started = self.cancelled = False
+        self.daemon = False
+        FakeTimer.created.append(self)
+
+    def start(self):
+        self.started = True
+
+    def cancel(self):
+        self.cancelled = True
+
+    def fire(self):
+        """What the real timer does when the total time is over."""
+        self.function()
+
+
+class HangingTV(FakeTV):
+    """Opens the channel, then a read never ends on its own (pings keep it alive).
+
+    The only way out is the watchdog closing the socket from outside.
+    """
+
+    def __init__(self, replies=()):
+        super().__init__(list(replies))
+        self.aborted = False
+
+    def abort(self):
+        self.aborted = True
+
+    def recv(self):
+        if self.replies:
+            return self.replies.pop(0)
+        FakeTimer.created[-1].fire()  # the total time runs out during this read
+        if self.aborted or self.closed:
+            raise ConnectionError("socket is already closed")
+        raise AssertionError("the read should have been ended by the watchdog")
+
+
 class UploaderTests(unittest.TestCase):
+    def setUp(self):
+        FakeTimer.created.clear()
+        patcher = mock.patch.object(tv.FrameClient, "timer_factory", FakeTimer)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_watchdog_ends_a_read_that_never_returns(self):
+        fake = HangingTV()
+        with self.assertRaises(tv.FrameError):
+            tv.publish("10.0.0.5", "T0", b"JPEG", [], connector=fake)
+        self.assertTrue(fake.aborted)
+        self.assertTrue(fake.closed)
+        timer = FakeTimer.created[-1]
+        self.assertEqual(timer.interval, tv.TOTAL_TIMEOUT)
+        self.assertTrue(timer.daemon)
+
+    def test_watchdog_ends_a_stuck_handshake_with_a_clear_message(self):
+        fake = HangingTV()
+        fake.replies = [json.dumps({"event": "ms.channel.connect", "data": {}})]  # never "ready"
+        with self.assertRaises(tv.FrameError) as caught:
+            tv.pair("10.0.0.5", connector=fake)
+        self.assertIn("too long", str(caught.exception))
+        self.assertIn("Allow", str(caught.exception))
+        self.assertTrue(FakeTimer.created[-1].cancelled)
+        self.assertTrue(fake.closed)
+
+    def test_watchdog_is_stopped_after_a_normal_update(self):
+        fake = FakeTV([art("image_added", content_id="MY_F0012"), art("artmode_status", value="on")])
+        tv.publish("10.0.0.5", "T0", b"JPEG", [], connector=fake)
+        timer = FakeTimer.created[-1]
+        self.assertTrue(timer.started)
+        self.assertTrue(timer.cancelled)
+
     def test_frame_layout(self):
         frame = tv.upload_frame(b"JPEG", "none")
         size = int.from_bytes(frame[:2], "big")

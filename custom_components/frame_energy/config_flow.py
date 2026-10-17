@@ -5,9 +5,11 @@ from pathlib import Path
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig, SelectSelectorMode
 
 from . import tv
-from .const import CONF_SHOW_UPDATE_TIME, CONF_TV_HOST, CONF_TV_TOKEN, DEFAULTS, DOMAIN, OPTIONAL_KEYS
+from .const import (CONF_SHOW_UPDATE_TIME, CONF_TV_HOST, CONF_TV_TOKEN, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL,
+                    DEFAULTS, DOMAIN, OPTIONAL_KEYS, UPDATE_INTERVALS)
 from .render import LABEL_DEFAULTS
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,6 +26,9 @@ def _schema(current: dict) -> vol.Schema:
     for key, value in LABEL_DEFAULTS.items():
         fields[vol.Optional(key, default=current.get(key, value))] = str
     fields[vol.Optional(CONF_SHOW_UPDATE_TIME, default=bool(current.get(CONF_SHOW_UPDATE_TIME, False)))] = bool
+    fields[vol.Required(CONF_UPDATE_INTERVAL, default=str(current.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL)))] = \
+        SelectSelector(SelectSelectorConfig(options=list(UPDATE_INTERVALS), mode=SelectSelectorMode.DROPDOWN,
+                                            translation_key=CONF_UPDATE_INTERVAL))
     fields[vol.Required(CONF_TV_HOST, default=current.get(CONF_TV_HOST, ""))] = str
     return vol.Schema(fields)
 

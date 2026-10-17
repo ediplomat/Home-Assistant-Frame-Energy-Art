@@ -3,6 +3,33 @@
 All notable changes to Frame Energy Art. Versions 1.1.0 to 1.2.0 were released
 on 11 and 12 October 2026.
 
+## 1.3.0
+
+### New
+
+- The picture updates by itself, every 15 minutes by default. Change it in
+  **Configure → Update the picture by itself**: 5, 10, 15, 30 or 60 minutes,
+  or Manual. Updates run on the clock and start one minute after Home
+  Assistant starts. An automation is no longer needed.
+- An update is skipped if a picture was made less than half an interval ago,
+  so an old automation and the built-in updates do not upload twice.
+- Integration icon.
+
+### Fixed
+
+- If the TV kept the connection open but never answered (for example while an
+  **Allow** message waited on the screen), an update could hang for minutes.
+  Now the connection is closed when the two minutes are over, and the error
+  says to look for an Allow message on the TV.
+
+### Changed
+
+- Ready for the HACS default store: issue tracker link in the manifest and
+  automatic Hassfest, HACS and test checks on GitHub.
+- Every release now has a `frame_energy.zip` file. HACS installs from it.
+- If you use the example automation, either turn it off or set the update
+  setting to Manual.
+
 ## 1.2.1
 
 ### Fixed

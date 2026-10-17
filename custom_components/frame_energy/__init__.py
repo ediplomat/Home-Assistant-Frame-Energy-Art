@@ -5,13 +5,15 @@ import logging
 from pathlib import Path
 
 import voluptuous as vol
-from homeassistant.core import ServiceCall
+from homeassistant.core import ServiceCall, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.event import async_call_later, async_track_time_change
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from . import tv
-from .const import CONF_SHOW_UPDATE_TIME, CONF_TV_HOST, CONF_TV_TOKEN, DOMAIN, ENTITY_DEFAULTS, STORAGE_VERSION
+from . import schedule, tv
+from .const import (CONF_SHOW_UPDATE_TIME, CONF_TV_HOST, CONF_TV_TOKEN, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL,
+                    DOMAIN, ENTITY_DEFAULTS, SCHEDULE_SECOND, STARTUP_DELAY, STORAGE_VERSION)
 from .render import LABEL_DEFAULTS, render
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,6 +45,9 @@ async def async_setup_entry(hass, entry):
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     async def handle_render(call: ServiceCall):
+        await _render_and_upload()
+
+    async def _render_and_upload():
         async with runtime["lock"]:
             config = merged_config(entry)
             now = dt_util.now()
@@ -79,6 +84,25 @@ async def async_setup_entry(hass, entry):
                 async_dispatcher_send(hass, f"{DOMAIN}_updated")
 
     hass.services.async_register(DOMAIN, "render", handle_render, schema=vol.Schema({}))
+
+    minutes = schedule.interval_minutes(merged_config(entry).get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL))
+    if minutes:
+        async def scheduled_update(_now=None):
+            if schedule.should_skip(runtime["lock"].locked(), runtime["last_generated"], dt_util.utcnow(), minutes):
+                _LOGGER.debug("Scheduled update skipped: a picture was just made or an update is running")
+                return
+            try:
+                await _render_and_upload()
+            except Exception:  # already logged and shown on the status sensor
+                pass
+
+        @callback
+        def start_update(now=None):
+            entry.async_create_background_task(hass, scheduled_update(now), f"{DOMAIN} scheduled update")
+
+        entry.async_on_unload(async_track_time_change(
+            hass, start_update, minute=schedule.schedule_minutes(minutes), second=SCHEDULE_SECOND))
+        entry.async_on_unload(async_call_later(hass, STARTUP_DELAY, start_update))
     return True
 
 
