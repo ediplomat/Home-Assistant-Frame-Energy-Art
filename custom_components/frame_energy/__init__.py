@@ -5,7 +5,9 @@ import logging
 from pathlib import Path
 
 import voluptuous as vol
-from homeassistant.core import ServiceCall, callback
+from homeassistant.core import ServiceCall, SupportsResponse, callback
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_call_later, async_track_time_change
 from homeassistant.helpers.storage import Store
@@ -13,7 +15,7 @@ from homeassistant.util import dt as dt_util
 
 from . import schedule, tv
 from .const import (CONF_SHOW_UPDATE_TIME, CONF_TV_HOST, CONF_TV_TOKEN, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL,
-                    DOMAIN, ENTITY_DEFAULTS, SCHEDULE_SECOND, STARTUP_DELAY, STORAGE_VERSION)
+                    DOMAIN, ENTITY_DEFAULTS, MAX_DELETE_FAILURES, SCHEDULE_SECOND, STARTUP_DELAY, STORAGE_VERSION)
 from .render import LABEL_DEFAULTS, render
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,6 +39,7 @@ async def async_setup_entry(hass, entry):
         "content_id": None,
         "error": None,
         "uploaded_ids": list(saved.get("ids", [])),
+        "delete_failures": dict(saved.get("delete_failures", {})),  # ID -> refusals in a row
         "late_ids": [],  # IDs the TV confirmed to an upload that never finished
         "store": store,
     }
@@ -85,6 +88,54 @@ async def async_setup_entry(hass, entry):
 
     hass.services.async_register(DOMAIN, "render", handle_render, schema=vol.Schema({}))
 
+    async def _talk_to_tv(func, *args):
+        """Run one short TV session under the same lock and time limit as an update."""
+        config = merged_config(entry)
+        if not config.get(CONF_TV_HOST):
+            raise HomeAssistantError("No TV paired: open Configure on Frame Energy Art and enter the TV IP address")
+        job = functools.partial(func, config[CONF_TV_HOST], runtime["token"], *args)
+        try:
+            result = await asyncio.wait_for(hass.async_add_executor_job(job), timeout=tv.TOTAL_TIMEOUT + 30)
+        except asyncio.TimeoutError as exc:
+            raise HomeAssistantError("The TV did not answer in time") from exc
+        except tv.FrameError as exc:
+            raise HomeAssistantError(str(exc)) from exc
+        if result.get("token"):
+            runtime["token"] = result["token"]
+        return config, result
+
+    async def handle_list_images(call: ServiceCall):
+        async with runtime["lock"]:
+            _, result = await _talk_to_tv(tv.list_images)
+        ours = set(runtime["uploaded_ids"])
+        images = [{
+            "content_id": item.get("content_id"),
+            "date": item.get("image_date"),
+            "width": item.get("width"),
+            "height": item.get("height"),
+            "current": item.get("content_id") == runtime["content_id"],
+            "tracked_by_frame_energy": item.get("content_id") in ours,
+        } for item in result["images"]]
+        return {"count": len(images), "images": images}
+
+    async def handle_delete_images(call: ServiceCall):
+        ids = [i.strip() for i in call.data["content_ids"] if i.strip()]
+        async with runtime["lock"]:
+            config, result = await _talk_to_tv(tv.delete_images, ids)
+            deleted = set(result["deleted"])
+            runtime["uploaded_ids"] = [i for i in runtime["uploaded_ids"] if i not in deleted]
+            for content_id in deleted:
+                runtime["delete_failures"].pop(content_id, None)
+            await _save(runtime, config)
+        async_dispatcher_send(hass, f"{DOMAIN}_updated")
+        return {"deleted": result["deleted"], "failed": result["failed"]}
+
+    hass.services.async_register(DOMAIN, "list_images", handle_list_images, schema=vol.Schema({}),
+                                 supports_response=SupportsResponse.ONLY)
+    hass.services.async_register(DOMAIN, "delete_images", handle_delete_images,
+                                 schema=vol.Schema({vol.Required("content_ids"): vol.All(cv.ensure_list, [cv.string])}),
+                                 supports_response=SupportsResponse.OPTIONAL)
+
     minutes = schedule.interval_minutes(merged_config(entry).get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL))
     if minutes:
         async def scheduled_update(_now=None):
@@ -128,15 +179,42 @@ async def _upload(hass, runtime, config):
         raise
     runtime["content_id"] = result["content_id"]
     runtime["last_upload_confirmed"] = dt_util.utcnow().isoformat()
-    # Never drop an ID: a forgotten ID is a picture left on the TV forever.
-    # If deletes keep failing, pending_deletes on the status sensor grows.
-    runtime["uploaded_ids"] = [result["content_id"], *result["pending"]]
+    # Keep every ID that was not deleted: a forgotten ID is a picture left on
+    # the TV. The one exception is an ID the TV has refused to delete many
+    # times in a row (often it is already gone): see _count_delete_failures.
+    pending = _count_delete_failures(runtime, result["pending"], result.get("failed", {}))
+    runtime["uploaded_ids"] = [result["content_id"], *pending]
     if result["token"]:
         runtime["token"] = result["token"]
     await _save(runtime, config)
     runtime["error"] = result["delete_error"]  # the upload worked, but show it on the sensor
     if result["delete_error"]:
-        _LOGGER.warning("Old artwork kept for retry %s: %s", result["pending"], result["delete_error"])
+        _LOGGER.warning("Old artwork kept for retry %s: %s", pending, result["delete_error"])
+
+
+def _count_delete_failures(runtime, pending: list[str], failed: dict) -> list[str]:
+    """Return the IDs to try again, after giving up on hopeless ones.
+
+    The TV may refuse to delete a picture forever, for example because it no
+    longer exists. After MAX_DELETE_FAILURES refusals in a row the ID is
+    dropped with a warning; frame_energy.delete_images can still remove it.
+    """
+    failures = runtime["delete_failures"]
+    for content_id in list(failures):
+        if content_id not in pending:
+            failures.pop(content_id)  # deleted (or no longer tracked)
+    keep = []
+    for content_id in pending:
+        if content_id in failed:
+            failures[content_id] = failures.get(content_id, 0) + 1
+        if failures.get(content_id, 0) >= MAX_DELETE_FAILURES:
+            failures.pop(content_id)
+            _LOGGER.warning(
+                "The TV refused to delete %s %d times (%s). It is no longer retried. If it is still on the TV, "
+                "remove it with frame_energy.delete_images.", content_id, MAX_DELETE_FAILURES, failed.get(content_id))
+            continue
+        keep.append(content_id)
+    return keep
 
 
 def _merge_late(runtime):
@@ -159,6 +237,7 @@ async def _save(runtime, config):
     # in the options, the freshly paired token wins over an older stored one.
     await runtime["store"].async_save({
         "ids": runtime["uploaded_ids"],
+        "delete_failures": runtime["delete_failures"],
         "token": runtime["token"],
         "paired_token": config.get(CONF_TV_TOKEN),
     })
@@ -170,7 +249,8 @@ async def _reload_on_options(hass, entry):
 
 async def async_unload_entry(hass, entry):
     if await hass.config_entries.async_unload_platforms(entry, ["sensor"]):
-        hass.services.async_remove(DOMAIN, "render")
+        for service in ("render", "list_images", "delete_images"):
+            hass.services.async_remove(DOMAIN, service)
         hass.data[DOMAIN].pop(entry.entry_id, None)
         return True
     return False

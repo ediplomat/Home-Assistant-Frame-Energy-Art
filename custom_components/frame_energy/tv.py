@@ -26,6 +26,7 @@ PAIRING_TIMEOUT = 35  # time for a person to press "Allow" on the TV
 REPLY_TIMEOUT = 15
 TOTAL_TIMEOUT = 120  # the whole talk with the TV must end within this time
 MAX_DELETES = 5  # old images tried per update; the rest wait for the next one
+MY_PHOTOS = "MY-C0002"  # Art Mode category of uploaded pictures
 
 
 class FrameError(Exception):
@@ -224,10 +225,23 @@ class FrameClient:
         self.conn.send(request_message({"request": "select_image", "content_id": content_id, "show": show}))
 
     def delete(self, content_id: str) -> None:
-        """Delete exactly one image. Callers pass only IDs this project uploaded."""
+        """Delete exactly one image. Callers pass only IDs this project uploaded or the user named."""
         self._arm()
         self.conn.send(request_message({"request": "delete_image_list", "content_id_list": [{"content_id": content_id}]}))
         wait_for(self.conn, {"image_deleted"}, max_messages=10, deadline=self.deadline)
+
+    def content_list(self, category: str = MY_PHOTOS) -> list[dict]:
+        """Pictures the TV keeps in one Art Mode category (``MY-C0002`` = My Photos)."""
+        self._arm()
+        self.conn.send(request_message({"request": "get_content_list", "category": category, "id": str(uuid.uuid4())}))
+        data = wait_for(self.conn, {"content_list"}, deadline=self.deadline)
+        items = data.get("content_list") or []
+        if isinstance(items, str):
+            try:
+                items = json.loads(items)
+            except ValueError as exc:
+                raise FrameError("The TV sent a picture list that could not be read") from exc
+        return [item for item in items if isinstance(item, dict)]
 
 
 def pair(host: str, connector=None) -> str:
@@ -262,7 +276,7 @@ def publish(host: str, token: str | None, jpeg: bytes, old_ids: list[str], conne
         # From here the new image exists on the TV, so its ID must always be
         # returned, whatever fails next (for example a dropped connection).
         old = [i for i in old_ids if i != content_id]
-        pending, error = list(old), None
+        pending, error, failed = list(old), None, {}
         try:
             # Never switch away from live TV: show now only if Art Mode is already on.
             client.select(content_id, show=client.art_mode_on())
@@ -270,9 +284,35 @@ def publish(host: str, token: str | None, jpeg: bytes, old_ids: list[str], conne
                 try:
                     client.delete(image)
                 except FrameError as exc:
-                    error = str(exc)
+                    error = failed[image] = str(exc)  # the TV refused this one; others may still work
                 else:
                     pending.remove(image)
         except Exception as exc:  # connection lost after the upload
             error = f"Connection lost after upload ({exc})"
-        return {"content_id": content_id, "pending": pending, "delete_error": error, "token": client.token}
+        return {"content_id": content_id, "pending": pending, "delete_error": error, "failed": failed,
+                "token": client.token}
+
+
+def list_images(host: str, token: str | None, connector=None) -> dict:
+    """Read the pictures in My Photos. Nothing is changed on the TV."""
+    with FrameClient(host, token, connector) as client:
+        items = client.content_list()
+        return {"images": items, "token": client.token}
+
+
+def delete_images(host: str, token: str | None, content_ids: list[str], connector=None) -> dict:
+    """Delete exactly the pictures named in ``content_ids``, one by one.
+
+    Used only when the user names the IDs himself (for example after
+    ``list_images``). One refused picture does not stop the others.
+    """
+    deleted, failed = [], {}
+    with FrameClient(host, token, connector) as client:
+        for content_id in content_ids:
+            try:
+                client.delete(content_id)
+            except FrameError as exc:
+                failed[content_id] = str(exc)
+            else:
+                deleted.append(content_id)
+        return {"deleted": deleted, "failed": failed, "token": client.token}

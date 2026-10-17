@@ -3,6 +3,22 @@
 All notable changes to Frame Energy Art. Versions 1.1.0 to 1.2.0 were released
 on 11 and 12 October 2026.
 
+## 1.3.1
+
+### New
+
+- **List TV pictures** (`frame_energy.list_images`): shows the pictures in My
+  Photos with their IDs. Nothing is changed.
+- **Delete TV pictures** (`frame_energy.delete_images`): deletes only the IDs
+  you enter. Useful on older Frames that can't delete pictures from the TV
+  menu or SmartThings.
+
+### Fixed
+
+- An old picture the TV refuses to delete is no longer retried forever. After
+  ten refusals in a row it is dropped with a warning, and the error on the
+  status sensor goes away.
+
 ## 1.3.0
 
 ### New

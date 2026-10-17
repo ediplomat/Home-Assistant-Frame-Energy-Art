@@ -1,3 +1,26 @@
 render:
   name: Paint and show
   description: Read the sensors, paint a new picture and show it on the paired TV.
+
+list_images:
+  name: List TV pictures
+  description: >-
+    Show the pictures in My Photos on the TV, with their IDs. Nothing is
+    changed. Pictures marked tracked_by_frame_energy are deleted
+    automatically by this integration.
+
+delete_images:
+  name: Delete TV pictures
+  description: >-
+    Delete only the pictures you name, by ID (for example MY_F0481). Use
+    List TV pictures first. Your own photos are never deleted unless you name
+    them here.
+  fields:
+    content_ids:
+      name: Picture IDs
+      description: One or more IDs from List TV pictures.
+      required: true
+      example: "MY_F0481"
+      selector:
+        text:
+          multiple: true

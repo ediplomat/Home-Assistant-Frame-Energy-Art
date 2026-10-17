@@ -31,4 +31,5 @@ CONF_UPDATE_INTERVAL = "update_interval"
 UPDATE_INTERVALS = ("5", "10", "15", "30", "60", "manual")
 DEFAULT_UPDATE_INTERVAL = "15"
 STARTUP_DELAY = 60  # seconds after start, so the sensors have their values first
+MAX_DELETE_FAILURES = 10  # refusals in a row before an old picture ID is given up
 SCHEDULE_SECOND = 30  # run at hh:mm:30, a little after an automation that runs at hh:mm:00

@@ -149,6 +149,29 @@ to turn one of them off.
 
 If you use your own automation, use `mode: restart`, as in the example.
 
+## Pictures on the TV
+
+Every update saves a new picture on the TV and deletes the previous one, so
+normally only one picture from this project is there. Some older Frames can't
+delete pictures from the TV menu or the SmartThings app, so there are two
+actions for the rare case when an extra picture stays behind (for example
+after an update that was cut off):
+
+- **Frame Energy Art: List TV pictures** (`frame_energy.list_images`) shows
+  the pictures in My Photos with their IDs and dates. Nothing is changed.
+  `current` is the picture shown now; `tracked_by_frame_energy` pictures are
+  deleted automatically.
+- **Frame Energy Art: Delete TV pictures** (`frame_energy.delete_images`)
+  deletes only the IDs you enter, for example `MY_F0481`. Your own photos are
+  never deleted unless you enter their IDs.
+
+Run them from **Developer tools → Actions** and press **Perform action**; the
+answer is shown below.
+
+If the TV refuses to delete an old picture ten times in a row (often because
+it is already gone), the integration stops trying and writes a warning to the
+log.
+
 ## Status sensor
 
 `sensor.frame_energy_last_generated` shows when the picture was last painted.

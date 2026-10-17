@@ -262,6 +262,30 @@ class UploaderTests(unittest.TestCase):
         self.assertLess(fake.reads, 5)
         self.assertTrue(fake.closed)
 
+    def test_failed_deletes_are_reported_per_id(self):
+        fake = FakeTV([art("image_added", content_id="MY_F0012"), art("artmode_status", value="on"),
+                       art("error", error_code="-7"), art("image_deleted")])
+        result = tv.publish("10.0.0.5", "T0", b"JPEG", ["MY_F0481", "MY_F0010"], connector=fake)
+        self.assertEqual(list(result["failed"]), ["MY_F0481"])
+        self.assertEqual(result["pending"], ["MY_F0481"])
+
+    def test_list_images_reads_my_photos(self):
+        items = [{"content_id": "MY_F0001", "image_date": "2026:10:17 19:00:00", "width": 1920, "height": 1080}]
+        fake = FakeTV([art("content_list", content_list=json.dumps(items))])
+        result = tv.list_images("10.0.0.5", "T0", connector=fake)
+        self.assertEqual(result["images"], items)
+        self.assertEqual(fake.sent[0]["request"], "get_content_list")
+        self.assertEqual(fake.sent[0]["category"], "MY-C0002")
+        self.assertTrue(fake.closed)
+
+    def test_delete_images_deletes_only_named_ids_and_goes_on_after_a_refusal(self):
+        fake = FakeTV([art("error", error_code="-7"), art("image_deleted")])
+        result = tv.delete_images("10.0.0.5", "T0", ["MY_F0481", "MY_F0496"], connector=fake)
+        self.assertEqual(result["deleted"], ["MY_F0496"])
+        self.assertEqual(list(result["failed"]), ["MY_F0481"])
+        named = [m["content_id_list"][0]["content_id"] for m in fake.sent]
+        self.assertEqual(named, ["MY_F0481", "MY_F0496"])
+
     def test_confirmed_id_is_reported_at_once(self):
         class Stop(BaseException):
             """Stands for a call that never comes back."""
