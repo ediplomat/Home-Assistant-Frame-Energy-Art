@@ -13,5 +13,6 @@ actions:
     then:
       - delay: "00:01:00"
   - action: frame_energy.render
-mode: single
-max_exceeded: silent
+# restart: if one update ever gets stuck, the next one ends it and starts fresh.
+# With "single" a stuck update would silently block all later ones.
+mode: restart

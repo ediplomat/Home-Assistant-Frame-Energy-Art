@@ -15,6 +15,7 @@ from __future__ import annotations
 import base64
 import json
 import ssl
+import time
 import uuid
 
 CLIENT_NAME = "FrameEnergyArt"
@@ -22,6 +23,7 @@ PORT = 8002
 CONNECT_TIMEOUT = 10
 PAIRING_TIMEOUT = 35  # time for a person to press "Allow" on the TV
 REPLY_TIMEOUT = 15
+TOTAL_TIMEOUT = 120  # the whole talk with the TV must end within this time
 MAX_DELETES = 5  # old images tried per update; the rest wait for the next one
 
 
@@ -67,9 +69,26 @@ def art_event(raw) -> dict | None:
         return None
 
 
-def wait_for(conn, events: set[str], max_messages: int = 20) -> dict:
-    """Read until one of ``events`` (or an error) arrives; raise otherwise."""
+def time_left(deadline: float | None) -> float | None:
+    """Seconds left until ``deadline`` (a time.monotonic() value); raise when over."""
+    if deadline is None:
+        return None
+    left = deadline - time.monotonic()
+    if left <= 0:
+        raise FrameError("The TV took too long to answer")
+    return left
+
+
+def wait_for(conn, events: set[str], max_messages: int = 20, deadline: float | None = None) -> dict:
+    """Read until one of ``events`` (or an error) arrives; raise otherwise.
+
+    Every read has its own timeout, but a TV that keeps sending other
+    messages could still hold us for minutes, so ``deadline`` limits the total.
+    """
     for _ in range(max_messages):
+        left = time_left(deadline)
+        if left is not None:
+            conn.settimeout(min(REPLY_TIMEOUT, left))
         try:
             raw = conn.recv()
         except Exception as exc:  # timeout or closed socket
@@ -93,20 +112,26 @@ class FrameClient:
         self._connector = connector
         self.conn = None
         self.ready = False
+        self.deadline = None
+
+    def _arm(self) -> None:
+        """Give the next socket operation what is left of the total time."""
+        self.conn.settimeout(min(REPLY_TIMEOUT, time_left(self.deadline)))
 
     def __enter__(self):
         connect = self._connector
         if connect is None:
             import websocket  # websocket-client, installed via manifest requirements
             connect = websocket.create_connection
+        self.deadline = time.monotonic() + TOTAL_TIMEOUT
         self.conn = connect(
             art_url(self.host, self.token),
             timeout=CONNECT_TIMEOUT,
             sslopt={"cert_reqs": ssl.CERT_NONE},  # the TV uses a self-signed certificate
         )
-        self.conn.settimeout(PAIRING_TIMEOUT)
         for _ in range(10):
             try:
+                self.conn.settimeout(min(PAIRING_TIMEOUT, time_left(self.deadline)))
                 msg = json.loads(self.conn.recv())
             except Exception as exc:
                 self.conn.close()
@@ -130,8 +155,9 @@ class FrameClient:
             self.conn.close()
 
     def upload(self, jpeg: bytes, matte: str = "none") -> str:
+        self._arm()
         self.conn.send_binary(upload_frame(jpeg, matte))
-        content_id = wait_for(self.conn, {"image_added"}).get("content_id")
+        content_id = wait_for(self.conn, {"image_added"}, deadline=self.deadline).get("content_id")
         if not content_id:
             raise FrameError("TV confirmed the upload without a content_id")
         return str(content_id)
@@ -142,20 +168,23 @@ class FrameClient:
         Unknown counts as "no": interrupting live TV is worse than waiting
         for the next update.
         """
-        self.conn.send(request_message({"request": "get_artmode_status", "id": str(uuid.uuid4())}))
         try:
-            return wait_for(self.conn, {"artmode_status"}, max_messages=10).get("value") == "on"
+            self._arm()
+            self.conn.send(request_message({"request": "get_artmode_status", "id": str(uuid.uuid4())}))
+            return wait_for(self.conn, {"artmode_status"}, max_messages=10, deadline=self.deadline).get("value") == "on"
         except FrameError:
             return False
 
     def select(self, content_id: str, show: bool) -> None:
         """Make the image the current artwork; ``show`` switches the screen to it."""
+        self._arm()
         self.conn.send(request_message({"request": "select_image", "content_id": content_id, "show": show}))
 
     def delete(self, content_id: str) -> None:
         """Delete exactly one image. Callers pass only IDs this project uploaded."""
+        self._arm()
         self.conn.send(request_message({"request": "delete_image_list", "content_id_list": [{"content_id": content_id}]}))
-        wait_for(self.conn, {"image_deleted"}, max_messages=10)
+        wait_for(self.conn, {"image_deleted"}, max_messages=10, deadline=self.deadline)
 
 
 def pair(host: str, connector=None) -> str:
@@ -170,16 +199,23 @@ def pair(host: str, connector=None) -> str:
         return client.token or ""
 
 
-def publish(host: str, token: str | None, jpeg: bytes, old_ids: list[str], connector=None) -> dict:
+def publish(host: str, token: str | None, jpeg: bytes, old_ids: list[str], connector=None,
+            confirmed: list[str] | None = None) -> dict:
     """Upload and show the new image, then remove this project's older images.
 
     ``old_ids`` holds only content IDs this integration uploaded earlier.
     IDs that were not deleted (failed, skipped or cut off by a lost
     connection) are returned in ``pending``, so the next run retries them
     instead of forgetting them on the TV.
+
+    ``confirmed`` is an optional list that gets the new ID the moment the TV
+    confirms the upload. If this call never returns, the caller still knows
+    the ID and can delete that picture later.
     """
     with FrameClient(host, token, connector) as client:
         content_id = client.upload(jpeg)
+        if confirmed is not None:
+            confirmed.append(content_id)
         # From here the new image exists on the TV, so its ID must always be
         # returned, whatever fails next (for example a dropped connection).
         old = [i for i in old_ids if i != content_id]

@@ -129,6 +129,10 @@ After a successful manual test, add
 editor. It updates the picture every 15 minutes and one minute after Home
 Assistant starts. Nothing is scheduled automatically.
 
+The example uses `mode: restart`. If one update ever gets stuck, the next one
+ends it and starts fresh. With `mode: single` a stuck update would block all
+later ones without any message.
+
 ## Status sensor
 
 `sensor.frame_energy_last_generated` shows when the picture was last painted.
@@ -146,6 +150,11 @@ Attributes:
   restart Home Assistant.
 - **Pairing fails:** check the IP address and that the TV is on. If the TV
   asks, press **Allow** within 30 seconds.
+- **The picture stopped updating:** look at `last_upload_confirmed` on the
+  status sensor. If it is old, run `frame_energy.render` once from Developer
+  tools and read the `error` attribute. If your automation uses
+  `mode: single`, change it to `mode: restart`, as in the example. While the
+  TV is off, updates fail. They work again when the TV is back.
 - **Missing background:** check the path and that the file exists.
 - **Dashes instead of numbers:** check entity IDs, availability and units.
 - **No forecast:** the weather entity must support daily forecasts.
@@ -155,7 +164,9 @@ Attributes:
 The picture is drawn with Pillow in Home Assistant's executor, and the file is
 replaced in one step, so the TV never gets a half-written picture. A lock stops
 two updates running at the same time. The TV client (`tv.py`) talks to the
-Frame's Art Mode over a local WebSocket.
+Frame's Art Mode over a local WebSocket. The whole talk with the TV is limited
+to two minutes, so a stuck update ends with an error and never blocks the
+next ones.
 
 ```sh
 python -m pip install 'Pillow>=10.0.0'

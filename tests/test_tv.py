@@ -3,6 +3,7 @@ import importlib.util
 import json
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("frame_tv", ROOT / "custom_components/frame_energy/tv.py")
@@ -42,6 +43,31 @@ class FakeTV:
 
     def close(self):
         self.closed = True
+
+
+class Clock:
+    """A fake time.monotonic(), so the tests need no real waiting."""
+
+    def __init__(self):
+        self.now = 1000.0
+
+    def __call__(self):
+        return self.now
+
+
+class ChattyTV(FakeTV):
+    """After the scripted replies it keeps sending other messages, 50 s apart."""
+
+    def __init__(self, clock, replies=()):
+        super().__init__(list(replies))
+        self.clock, self.reads = clock, 0
+
+    def recv(self):
+        if self.replies:
+            return self.replies.pop(0)
+        self.reads += 1
+        self.clock.now += 50
+        return art("other_event")
 
 
 class UploaderTests(unittest.TestCase):
@@ -138,6 +164,41 @@ class UploaderTests(unittest.TestCase):
         fake.replies = [json.dumps({"event": "ms.channel.connect", "data": {}})] + [json.dumps({"event": "other"})] * 9
         with self.assertRaises(tv.FrameError):
             tv.pair("10.0.0.5", connector=fake)
+
+    def test_total_time_limit_stops_a_chatty_tv(self):
+        clock = Clock()
+        fake = ChattyTV(clock)
+        with mock.patch.object(tv.time, "monotonic", clock):
+            with self.assertRaises(tv.FrameError) as caught:
+                tv.publish("10.0.0.5", "T0", b"JPEG", [], connector=fake)
+        self.assertIn("too long", str(caught.exception))
+        self.assertLess(fake.reads, 5)
+        self.assertTrue(fake.closed)
+
+    def test_total_time_limit_stops_a_slow_handshake(self):
+        clock = Clock()
+        fake = ChattyTV(clock, replies=[json.dumps({"event": "ms.channel.connect", "data": {}})])
+        fake.replies = fake.replies[2:]  # drop the scripted "ready": the TV never says it
+        with mock.patch.object(tv.time, "monotonic", clock):
+            with self.assertRaises(tv.FrameError):
+                tv.pair("10.0.0.5", connector=fake)
+        self.assertLess(fake.reads, 5)
+        self.assertTrue(fake.closed)
+
+    def test_confirmed_id_is_reported_at_once(self):
+        class Stop(BaseException):
+            """Stands for a call that never comes back."""
+
+        fake = FakeTV([art("image_added", content_id="MY_F0012")])
+
+        def hang(text):
+            raise Stop()
+
+        fake.send = hang
+        confirmed = []
+        with self.assertRaises(Stop):
+            tv.publish("10.0.0.5", "T0", b"JPEG", ["MY_F0011"], connector=fake, confirmed=confirmed)
+        self.assertEqual(confirmed, ["MY_F0012"])
 
 
 if __name__ == "__main__":

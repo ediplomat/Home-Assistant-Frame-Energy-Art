@@ -1,5 +1,6 @@
 """Generate live art locally and show it on Samsung The Frame."""
 import asyncio
+import functools
 import logging
 from pathlib import Path
 
@@ -34,6 +35,7 @@ async def async_setup_entry(hass, entry):
         "content_id": None,
         "error": None,
         "uploaded_ids": list(saved.get("ids", [])),
+        "late_ids": [],  # IDs the TV confirmed to an upload that never finished
         "store": store,
     }
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = runtime
@@ -85,8 +87,21 @@ async def _upload(hass, runtime, config):
     if not config.get(CONF_TV_HOST):
         raise RuntimeError("No TV paired: open Configure on Frame Energy Art and enter the TV IP address")
     jpeg = await hass.async_add_executor_job(Path(config["output_path"]).read_bytes)
-    result = await hass.async_add_executor_job(
-        tv.publish, config[CONF_TV_HOST], runtime["token"], jpeg, list(runtime["uploaded_ids"]))
+    _merge_late(runtime)
+    publish = functools.partial(
+        tv.publish, config[CONF_TV_HOST], runtime["token"], jpeg, list(runtime["uploaded_ids"]),
+        confirmed=runtime["late_ids"])
+    try:
+        # tv.publish has its own time limit. This is the second safety net: a
+        # stuck update must end with an error, never hold the lock for hours.
+        result = await asyncio.wait_for(hass.async_add_executor_job(publish), timeout=tv.TOTAL_TIMEOUT + 30)
+    except asyncio.TimeoutError as exc:
+        _merge_late(runtime)
+        await _save(runtime, config)
+        raise RuntimeError("The TV did not finish the upload in time") from exc
+    except asyncio.CancelledError:
+        _merge_late(runtime)  # for example the automation was restarted
+        raise
     runtime["content_id"] = result["content_id"]
     runtime["last_upload_confirmed"] = dt_util.utcnow().isoformat()
     # Never drop an ID: a forgotten ID is a picture left on the TV forever.
@@ -98,6 +113,21 @@ async def _upload(hass, runtime, config):
     runtime["error"] = result["delete_error"]  # the upload worked, but show it on the sensor
     if result["delete_error"]:
         _LOGGER.warning("Old artwork kept for retry %s: %s", result["pending"], result["delete_error"])
+
+
+def _merge_late(runtime):
+    """Move IDs confirmed by a stuck or cancelled upload into the retry list.
+
+    A picture the TV confirmed is on the TV, so its ID must not be forgotten.
+    The list may still grow while a stuck thread ends later, so only the part
+    already read is removed.
+    """
+    late = runtime["late_ids"]
+    seen = list(late)
+    for content_id in seen:
+        if content_id not in runtime["uploaded_ids"]:
+            runtime["uploaded_ids"].append(content_id)
+    del late[:len(seen)]
 
 
 async def _save(runtime, config):
