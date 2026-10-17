@@ -13,7 +13,7 @@ jobs:
   zip:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check the version
         run: |
           version=$(python3 -c "import json; print(json.load(open('custom_components/frame_energy/manifest.json'))['version'])")
