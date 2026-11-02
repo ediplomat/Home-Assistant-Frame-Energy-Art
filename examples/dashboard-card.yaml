@@ -1,0 +1,31 @@
+# A status card for your dashboard. It uses only built-in cards.
+# Add it with: Edit dashboard -> Add card -> Manual, then paste this text.
+# The entity ID below is the default one. If yours differs, check it in
+# Settings -> Devices & services -> Entities.
+type: vertical-stack
+cards:
+  - type: entities
+    title: Frame Energy Art
+    show_header_toggle: false
+    entities:
+      - entity: sensor.frame_energy_last_generated
+        name: Picture painted
+      - type: attribute
+        entity: sensor.frame_energy_last_generated
+        attribute: last_upload_confirmed
+        name: TV confirmed the picture
+        format: relative
+      - type: attribute
+        entity: sensor.frame_energy_last_generated
+        attribute: pending_deletes
+        name: Old pictures waiting to be deleted
+      - type: attribute
+        entity: sensor.frame_energy_last_generated
+        attribute: error
+        name: Last problem
+  - type: button
+    name: Paint and show now
+    icon: mdi:palette
+    tap_action:
+      action: perform-action
+      perform_action: frame_energy.render

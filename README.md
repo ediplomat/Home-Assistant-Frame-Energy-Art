@@ -55,14 +55,18 @@ changed Art Mode on newer models.
   static pictures, so this needs more than a new picture every 15 minutes.
   Ideas, not tested yet: small shifts of the layout, changing backgrounds and
   a darker image.
-- Make the update interval a setting, if people ask for it.
 
 If you test it on another TV, please open an issue and tell me the model and
 year, even if it works.
 
 ## Installation
 
-### HACS (custom repository)
+### HACS
+
+1. Open **HACS** and search for **Frame Energy Art**.
+2. Open it, press **Download** and restart Home Assistant.
+
+### HACS (custom repository, if search does not find it)
 
 1. HACS → three dots → **Custom repositories**.
 2. Add `https://github.com/ediplomat/Home-Assistant-Frame-Energy-Art`,
@@ -86,6 +90,9 @@ for example to `/media/frame_assets/my_picture.jpg` with the **File editor**
 or **Samba share** add-on, and enter that path in the setup.
 
 ## Setup
+
+The setup and settings screens are available in English and Russian. The
+sensor and service names stay in English.
 
 0. **On the TV first:** open **Settings → General → External Device Manager →
    Device Connection Manager** and set **Access Notification** to
@@ -183,6 +190,10 @@ Attributes:
   watch TV it waits for Art Mode);
 - `pending_deletes` – old pictures still waiting to be deleted;
 - `error` – the last problem, if any.
+
+A ready dashboard card with these values and a **Paint and show now** button
+is in [examples/dashboard-card.yaml](examples/dashboard-card.yaml). It uses
+only the cards that come with Home Assistant.
 
 ## Troubleshooting
 

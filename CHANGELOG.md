@@ -3,6 +3,24 @@
 All notable changes to Frame Energy Art. Versions 1.1.0 to 1.2.0 were released
 on 11 and 12 October 2026.
 
+## 1.4.0
+
+### New
+
+- Russian translation of the setup and settings screens.
+- `examples/dashboard-card.yaml`: a dashboard card with the status sensor and
+  a **Paint and show now** button.
+
+### Changed
+
+- README: the install section now starts with finding Frame Energy Art by
+  search in HACS. The custom repository steps stay as a fallback.
+
+### Fixed
+
+- The README no longer lists the update interval as a plan. It is already a
+  setting.
+
 ## 1.3.2
 
 ### Fixed
