@@ -1,0 +1,104 @@
+{
+  "title": "Frame Energy Art",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Frame Energy Art",
+        "description": "Œuvre d'art en direct pour Samsung The Frame. Choisissez vos capteurs, les noms affichés sur l'image et l'adresse IP du téléviseur.",
+        "data": {
+          "background_path": "Votre propre image d'arrière-plan (laisser vide pour utiliser la peinture intégrée)",
+          "output_path": "Chemin du fichier JPG généré",
+          "solar": "Puissance solaire",
+          "home": "Consommation de la maison",
+          "battery": "Niveau de la batterie domestique en %",
+          "battery_charge": "Puissance de charge de la batterie",
+          "battery_discharge": "Puissance de décharge de la batterie",
+          "tesla": "Batterie du premier véhicule en % (laisser vide si vous n'avez pas de voiture)",
+          "tesla_power": "Puissance de charge du premier véhicule",
+          "hyundai": "Batterie du second véhicule en % (laisser vide si vous n'avez qu'une voiture)",
+          "hyundai_power": "Puissance de charge du second véhicule",
+          "weather": "Météo",
+          "tv_host": "Adresse IP du téléviseur",
+          "vehicle1_name": "Nom du premier véhicule",
+          "vehicle1_letter": "Monogramme du premier véhicule (1 à 2 lettres)",
+          "vehicle2_name": "Nom du second véhicule",
+          "vehicle2_letter": "Monogramme du second véhicule (1 à 2 lettres)",
+          "location_name": "Texte sous la météo (par ex. le nom de votre village)",
+          "show_update_time": "Afficher l'heure de mise à jour sous la date",
+          "update_interval": "Mettre à jour l'image automatiquement"
+        },
+        "data_description": {
+          "update_interval": "Choisissez « Manuel » si vous ne mettez l'image à jour qu'avec votre propre automatisation (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Associer avec le téléviseur",
+        "description": "Allumez le téléviseur et appuyez sur « Valider ». Si le téléviseur ({host}) vous le demande, choisissez « Autoriser » dans les 30 secondes."
+      }
+    },
+    "error": {
+      "missing_background": "Le fichier d'arrière-plan vierge n'existe pas",
+      "same_path": "Le fichier généré ne doit pas écraser l'arrière-plan",
+      "pairing_failed": "Le téléviseur n'a pas ouvert la connexion. Vérifiez l'adresse IP et que le téléviseur est allumé. Si le téléviseur vous le demande, choisissez « Autoriser ».",
+      "missing_host": "Saisissez l'adresse IP du téléviseur"
+    },
+    "abort": {
+      "already_configured": "Déjà configuré"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frame Energy Art",
+        "description": "Œuvre d'art en direct pour Samsung The Frame. Choisissez vos capteurs, les noms affichés sur l'image et l'adresse IP du téléviseur.",
+        "data": {
+          "background_path": "Votre propre image d'arrière-plan (laisser vide pour utiliser la peinture intégrée)",
+          "output_path": "Chemin du fichier JPG généré",
+          "solar": "Puissance solaire",
+          "home": "Consommation de la maison",
+          "battery": "Niveau de la batterie domestique en %",
+          "battery_charge": "Puissance de charge de la batterie",
+          "battery_discharge": "Puissance de décharge de la batterie",
+          "tesla": "Batterie du premier véhicule en % (laisser vide si vous n'avez pas de voiture)",
+          "tesla_power": "Puissance de charge du premier véhicule",
+          "hyundai": "Batterie du second véhicule en % (laisser vide si vous n'avez qu'une voiture)",
+          "hyundai_power": "Puissance de charge du second véhicule",
+          "weather": "Météo",
+          "tv_host": "Adresse IP du téléviseur",
+          "vehicle1_name": "Nom du premier véhicule",
+          "vehicle1_letter": "Monogramme du premier véhicule (1 à 2 lettres)",
+          "vehicle2_name": "Nom du second véhicule",
+          "vehicle2_letter": "Monogramme du second véhicule (1 à 2 lettres)",
+          "location_name": "Texte sous la météo (par ex. le nom de votre village)",
+          "show_update_time": "Afficher l'heure de mise à jour sous la date",
+          "update_interval": "Mettre à jour l'image automatiquement"
+        },
+        "data_description": {
+          "update_interval": "Choisissez « Manuel » si vous ne mettez l'image à jour qu'avec votre propre automatisation (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Associer avec le téléviseur",
+        "description": "Allumez le téléviseur et appuyez sur « Valider ». Si le téléviseur ({host}) vous le demande, choisissez « Autoriser » dans les 30 secondes."
+      }
+    },
+    "error": {
+      "missing_background": "Le fichier d'arrière-plan vierge n'existe pas",
+      "same_path": "Le fichier généré ne doit pas écraser l'arrière-plan",
+      "pairing_failed": "Le téléviseur n'a pas ouvert la connexion. Vérifiez l'adresse IP et que le téléviseur est allumé. Si le téléviseur vous le demande, choisissez « Autoriser ».",
+      "missing_host": "Saisissez l'adresse IP du téléviseur"
+    }
+  },
+  "selector": {
+    "update_interval": {
+      "options": {
+        "5": "Toutes les 5 minutes",
+        "10": "Toutes les 10 minutes",
+        "15": "Toutes les 15 minutes (recommandé)",
+        "30": "Toutes les 30 minutes",
+        "60": "Toutes les heures",
+        "manual": "Manuel (uniquement avec votre propre automatisation)"
+      }
+    }
+  }
+}

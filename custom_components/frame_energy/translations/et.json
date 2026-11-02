@@ -1,0 +1,104 @@
+{
+  "title": "Frame Energy Art",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Frame Energy Art",
+        "description": "Reaalajas kunstiteos Samsung The Frame’ile. Vali andurid, pildil kuvatavad nimed ja teleri IP-aadress.",
+        "data": {
+          "background_path": "Sinu enda taustapilt (jäta tühjaks, et kasutada sisseehitatud maali)",
+          "output_path": "Loodud JPG-faili tee",
+          "solar": "Päikeseenergia võimsus",
+          "home": "Kodu energiatarbimine",
+          "battery": "Koduaku laetus, %",
+          "battery_charge": "Aku laadimisvõimsus",
+          "battery_discharge": "Aku tühjendusvõimsus",
+          "tesla": "Esimese sõiduki aku laetus, % (jäta tühjaks, kui autot pole)",
+          "tesla_power": "Esimese sõiduki laadimisvõimsus",
+          "hyundai": "Teise sõiduki aku laetus, % (jäta tühjaks, kui auto on üks)",
+          "hyundai_power": "Teise sõiduki laadimisvõimsus",
+          "weather": "Ilm",
+          "tv_host": "Teleri IP-aadress",
+          "vehicle1_name": "Esimese sõiduki nimi",
+          "vehicle1_letter": "Esimese sõiduki monogramm (1–2 tähte)",
+          "vehicle2_name": "Teise sõiduki nimi",
+          "vehicle2_letter": "Teise sõiduki monogramm (1–2 tähte)",
+          "location_name": "Tekst ilma all (nt sinu asula nimi)",
+          "show_update_time": "Näita uuendamise aega kuupäeva all",
+          "update_interval": "Uuenda pilti automaatselt"
+        },
+        "data_description": {
+          "update_interval": "Vali „Käsitsi“, kui uuendad pilti ainult oma automatiseeringuga (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Teleriga sidumine",
+        "description": "Lülita teler sisse ja vajuta „Saada“. Kui teler ({host}) küsib, vali 30 sekundi jooksul „Luba“."
+      }
+    },
+    "error": {
+      "missing_background": "Puhta tausta faili ei ole olemas",
+      "same_path": "Loodud pilt ei tohi tausta üle kirjutada",
+      "pairing_failed": "Teler ei avanud ühendust. Kontrolli IP-aadressi ja seda, kas teler on sisse lülitatud. Kui teler küsib, vali „Luba“.",
+      "missing_host": "Sisesta teleri IP-aadress"
+    },
+    "abort": {
+      "already_configured": "Juba seadistatud"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frame Energy Art",
+        "description": "Reaalajas kunstiteos Samsung The Frame’ile. Vali andurid, pildil kuvatavad nimed ja teleri IP-aadress.",
+        "data": {
+          "background_path": "Sinu enda taustapilt (jäta tühjaks, et kasutada sisseehitatud maali)",
+          "output_path": "Loodud JPG-faili tee",
+          "solar": "Päikeseenergia võimsus",
+          "home": "Kodu energiatarbimine",
+          "battery": "Koduaku laetus, %",
+          "battery_charge": "Aku laadimisvõimsus",
+          "battery_discharge": "Aku tühjendusvõimsus",
+          "tesla": "Esimese sõiduki aku laetus, % (jäta tühjaks, kui autot pole)",
+          "tesla_power": "Esimese sõiduki laadimisvõimsus",
+          "hyundai": "Teise sõiduki aku laetus, % (jäta tühjaks, kui auto on üks)",
+          "hyundai_power": "Teise sõiduki laadimisvõimsus",
+          "weather": "Ilm",
+          "tv_host": "Teleri IP-aadress",
+          "vehicle1_name": "Esimese sõiduki nimi",
+          "vehicle1_letter": "Esimese sõiduki monogramm (1–2 tähte)",
+          "vehicle2_name": "Teise sõiduki nimi",
+          "vehicle2_letter": "Teise sõiduki monogramm (1–2 tähte)",
+          "location_name": "Tekst ilma all (nt sinu asula nimi)",
+          "show_update_time": "Näita uuendamise aega kuupäeva all",
+          "update_interval": "Uuenda pilti automaatselt"
+        },
+        "data_description": {
+          "update_interval": "Vali „Käsitsi“, kui uuendad pilti ainult oma automatiseeringuga (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Teleriga sidumine",
+        "description": "Lülita teler sisse ja vajuta „Saada“. Kui teler ({host}) küsib, vali 30 sekundi jooksul „Luba“."
+      }
+    },
+    "error": {
+      "missing_background": "Puhta tausta faili ei ole olemas",
+      "same_path": "Loodud pilt ei tohi tausta üle kirjutada",
+      "pairing_failed": "Teler ei avanud ühendust. Kontrolli IP-aadressi ja seda, kas teler on sisse lülitatud. Kui teler küsib, vali „Luba“.",
+      "missing_host": "Sisesta teleri IP-aadress"
+    }
+  },
+  "selector": {
+    "update_interval": {
+      "options": {
+        "5": "Iga 5 minuti järel",
+        "10": "Iga 10 minuti järel",
+        "15": "Iga 15 minuti järel (soovitatav)",
+        "30": "Iga 30 minuti järel",
+        "60": "Iga tunni järel",
+        "manual": "Käsitsi (ainult sinu enda automatiseeringuga)"
+      }
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "title": "Frame Energy Art",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Frame Energy Art",
+        "description": "Live-Kunstwerk für Samsung The Frame. Wähle deine Sensoren, die Namen im Bild und die IP-Adresse des Fernsehers.",
+        "data": {
+          "background_path": "Eigenes Hintergrundbild (leer lassen für das eingebaute Gemälde)",
+          "output_path": "Pfad der erzeugten JPG-Datei",
+          "solar": "Solarleistung",
+          "home": "Hausverbrauch",
+          "battery": "Ladestand der Heimbatterie in %",
+          "battery_charge": "Ladeleistung der Batterie",
+          "battery_discharge": "Entladeleistung der Batterie",
+          "tesla": "Batterie des ersten Fahrzeugs in % (leer lassen, wenn du kein Auto hast)",
+          "tesla_power": "Ladeleistung des ersten Fahrzeugs",
+          "hyundai": "Batterie des zweiten Fahrzeugs in % (leer lassen, wenn du nur ein Auto hast)",
+          "hyundai_power": "Ladeleistung des zweiten Fahrzeugs",
+          "weather": "Wetter",
+          "tv_host": "IP-Adresse des Fernsehers",
+          "vehicle1_name": "Name des ersten Fahrzeugs",
+          "vehicle1_letter": "Monogramm des ersten Fahrzeugs (1–2 Buchstaben)",
+          "vehicle2_name": "Name des zweiten Fahrzeugs",
+          "vehicle2_letter": "Monogramm des zweiten Fahrzeugs (1–2 Buchstaben)",
+          "location_name": "Text unter dem Wetter (z. B. dein Wohnort)",
+          "show_update_time": "Aktualisierungszeit unter dem Datum anzeigen",
+          "update_interval": "Bild automatisch aktualisieren"
+        },
+        "data_description": {
+          "update_interval": "Wähle „Manuell“, wenn du das Bild nur mit deiner eigenen Automatisierung aktualisierst (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Mit dem Fernseher koppeln",
+        "description": "Schalte den Fernseher ein und tippe auf „Absenden“. Wenn der Fernseher ({host}) nachfragt, wähle innerhalb von 30 Sekunden „Zulassen“."
+      }
+    },
+    "error": {
+      "missing_background": "Die Datei mit dem sauberen Hintergrund existiert nicht",
+      "same_path": "Die Ausgabe darf den Hintergrund nicht überschreiben",
+      "pairing_failed": "Der Fernseher hat die Verbindung nicht geöffnet. Prüfe die IP-Adresse und ob der Fernseher eingeschaltet ist. Wenn der Fernseher nachfragt, wähle „Zulassen“.",
+      "missing_host": "Gib die IP-Adresse des Fernsehers ein"
+    },
+    "abort": {
+      "already_configured": "Bereits konfiguriert"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frame Energy Art",
+        "description": "Live-Kunstwerk für Samsung The Frame. Wähle deine Sensoren, die Namen im Bild und die IP-Adresse des Fernsehers.",
+        "data": {
+          "background_path": "Eigenes Hintergrundbild (leer lassen für das eingebaute Gemälde)",
+          "output_path": "Pfad der erzeugten JPG-Datei",
+          "solar": "Solarleistung",
+          "home": "Hausverbrauch",
+          "battery": "Ladestand der Heimbatterie in %",
+          "battery_charge": "Ladeleistung der Batterie",
+          "battery_discharge": "Entladeleistung der Batterie",
+          "tesla": "Batterie des ersten Fahrzeugs in % (leer lassen, wenn du kein Auto hast)",
+          "tesla_power": "Ladeleistung des ersten Fahrzeugs",
+          "hyundai": "Batterie des zweiten Fahrzeugs in % (leer lassen, wenn du nur ein Auto hast)",
+          "hyundai_power": "Ladeleistung des zweiten Fahrzeugs",
+          "weather": "Wetter",
+          "tv_host": "IP-Adresse des Fernsehers",
+          "vehicle1_name": "Name des ersten Fahrzeugs",
+          "vehicle1_letter": "Monogramm des ersten Fahrzeugs (1–2 Buchstaben)",
+          "vehicle2_name": "Name des zweiten Fahrzeugs",
+          "vehicle2_letter": "Monogramm des zweiten Fahrzeugs (1–2 Buchstaben)",
+          "location_name": "Text unter dem Wetter (z. B. dein Wohnort)",
+          "show_update_time": "Aktualisierungszeit unter dem Datum anzeigen",
+          "update_interval": "Bild automatisch aktualisieren"
+        },
+        "data_description": {
+          "update_interval": "Wähle „Manuell“, wenn du das Bild nur mit deiner eigenen Automatisierung aktualisierst (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Mit dem Fernseher koppeln",
+        "description": "Schalte den Fernseher ein und tippe auf „Absenden“. Wenn der Fernseher ({host}) nachfragt, wähle innerhalb von 30 Sekunden „Zulassen“."
+      }
+    },
+    "error": {
+      "missing_background": "Die Datei mit dem sauberen Hintergrund existiert nicht",
+      "same_path": "Die Ausgabe darf den Hintergrund nicht überschreiben",
+      "pairing_failed": "Der Fernseher hat die Verbindung nicht geöffnet. Prüfe die IP-Adresse und ob der Fernseher eingeschaltet ist. Wenn der Fernseher nachfragt, wähle „Zulassen“.",
+      "missing_host": "Gib die IP-Adresse des Fernsehers ein"
+    }
+  },
+  "selector": {
+    "update_interval": {
+      "options": {
+        "5": "Alle 5 Minuten",
+        "10": "Alle 10 Minuten",
+        "15": "Alle 15 Minuten (empfohlen)",
+        "30": "Alle 30 Minuten",
+        "60": "Jede Stunde",
+        "manual": "Manuell (nur mit deiner eigenen Automatisierung)"
+      }
+    }
+  }
+}

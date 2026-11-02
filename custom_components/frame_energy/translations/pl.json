@@ -1,0 +1,104 @@
+{
+  "title": "Frame Energy Art",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Frame Energy Art",
+        "description": "Obraz na żywo dla Samsung The Frame. Wybierz czujniki, nazwy widoczne na obrazie i adres IP telewizora.",
+        "data": {
+          "background_path": "Własny obraz tła (zostaw puste, aby użyć wbudowanego obrazu)",
+          "output_path": "Ścieżka wygenerowanego pliku JPG",
+          "solar": "Moc paneli słonecznych",
+          "home": "Zużycie energii w domu",
+          "battery": "Poziom naładowania domowego akumulatora w %",
+          "battery_charge": "Moc ładowania akumulatora",
+          "battery_discharge": "Moc rozładowania akumulatora",
+          "tesla": "Poziom naładowania pierwszego pojazdu w % (zostaw puste, jeśli nie masz samochodu)",
+          "tesla_power": "Moc ładowania pierwszego pojazdu",
+          "hyundai": "Poziom naładowania drugiego pojazdu w % (zostaw puste, jeśli masz jeden samochód)",
+          "hyundai_power": "Moc ładowania drugiego pojazdu",
+          "weather": "Pogoda",
+          "tv_host": "Adres IP telewizora",
+          "vehicle1_name": "Nazwa pierwszego pojazdu",
+          "vehicle1_letter": "Monogram pierwszego pojazdu (1–2 litery)",
+          "vehicle2_name": "Nazwa drugiego pojazdu",
+          "vehicle2_letter": "Monogram drugiego pojazdu (1–2 litery)",
+          "location_name": "Tekst pod pogodą (np. nazwa Twojej miejscowości)",
+          "show_update_time": "Pokaż czas aktualizacji pod datą",
+          "update_interval": "Aktualizuj obraz automatycznie"
+        },
+        "data_description": {
+          "update_interval": "Wybierz „Ręcznie”, jeśli obraz aktualizujesz tylko własną automatyzacją (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Sparuj z telewizorem",
+        "description": "Włącz telewizor i naciśnij „Wyślij”. Jeśli telewizor ({host}) zapyta, wybierz „Zezwól” w ciągu 30 sekund."
+      }
+    },
+    "error": {
+      "missing_background": "Plik z czystym tłem nie istnieje",
+      "same_path": "Wygenerowany obraz nie może nadpisać tła",
+      "pairing_failed": "Telewizor nie otworzył połączenia. Sprawdź adres IP i czy telewizor jest włączony. Jeśli telewizor zapyta, wybierz „Zezwól”.",
+      "missing_host": "Wpisz adres IP telewizora"
+    },
+    "abort": {
+      "already_configured": "Już skonfigurowano"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frame Energy Art",
+        "description": "Obraz na żywo dla Samsung The Frame. Wybierz czujniki, nazwy widoczne na obrazie i adres IP telewizora.",
+        "data": {
+          "background_path": "Własny obraz tła (zostaw puste, aby użyć wbudowanego obrazu)",
+          "output_path": "Ścieżka wygenerowanego pliku JPG",
+          "solar": "Moc paneli słonecznych",
+          "home": "Zużycie energii w domu",
+          "battery": "Poziom naładowania domowego akumulatora w %",
+          "battery_charge": "Moc ładowania akumulatora",
+          "battery_discharge": "Moc rozładowania akumulatora",
+          "tesla": "Poziom naładowania pierwszego pojazdu w % (zostaw puste, jeśli nie masz samochodu)",
+          "tesla_power": "Moc ładowania pierwszego pojazdu",
+          "hyundai": "Poziom naładowania drugiego pojazdu w % (zostaw puste, jeśli masz jeden samochód)",
+          "hyundai_power": "Moc ładowania drugiego pojazdu",
+          "weather": "Pogoda",
+          "tv_host": "Adres IP telewizora",
+          "vehicle1_name": "Nazwa pierwszego pojazdu",
+          "vehicle1_letter": "Monogram pierwszego pojazdu (1–2 litery)",
+          "vehicle2_name": "Nazwa drugiego pojazdu",
+          "vehicle2_letter": "Monogram drugiego pojazdu (1–2 litery)",
+          "location_name": "Tekst pod pogodą (np. nazwa Twojej miejscowości)",
+          "show_update_time": "Pokaż czas aktualizacji pod datą",
+          "update_interval": "Aktualizuj obraz automatycznie"
+        },
+        "data_description": {
+          "update_interval": "Wybierz „Ręcznie”, jeśli obraz aktualizujesz tylko własną automatyzacją (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Sparuj z telewizorem",
+        "description": "Włącz telewizor i naciśnij „Wyślij”. Jeśli telewizor ({host}) zapyta, wybierz „Zezwól” w ciągu 30 sekund."
+      }
+    },
+    "error": {
+      "missing_background": "Plik z czystym tłem nie istnieje",
+      "same_path": "Wygenerowany obraz nie może nadpisać tła",
+      "pairing_failed": "Telewizor nie otworzył połączenia. Sprawdź adres IP i czy telewizor jest włączony. Jeśli telewizor zapyta, wybierz „Zezwól”.",
+      "missing_host": "Wpisz adres IP telewizora"
+    }
+  },
+  "selector": {
+    "update_interval": {
+      "options": {
+        "5": "Co 5 minut",
+        "10": "Co 10 minut",
+        "15": "Co 15 minut (zalecane)",
+        "30": "Co 30 minut",
+        "60": "Co godzinę",
+        "manual": "Ręcznie (tylko własną automatyzacją)"
+      }
+    }
+  }
+}

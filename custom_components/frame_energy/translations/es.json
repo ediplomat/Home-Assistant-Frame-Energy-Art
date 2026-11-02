@@ -1,0 +1,104 @@
+{
+  "title": "Frame Energy Art",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Frame Energy Art",
+        "description": "Obra de arte en directo para Samsung The Frame. Elige tus sensores, los nombres que se muestran en la imagen y la dirección IP del televisor.",
+        "data": {
+          "background_path": "Tu propia imagen de fondo (déjalo vacío para usar la pintura integrada)",
+          "output_path": "Ruta del JPG generado",
+          "solar": "Potencia solar",
+          "home": "Consumo de la casa",
+          "battery": "Porcentaje de la batería doméstica",
+          "battery_charge": "Potencia de carga de la batería",
+          "battery_discharge": "Potencia de descarga de la batería",
+          "tesla": "Batería del primer vehículo en % (déjalo vacío si no tienes coche)",
+          "tesla_power": "Potencia de carga del primer vehículo",
+          "hyundai": "Batería del segundo vehículo en % (déjalo vacío si solo tienes un coche)",
+          "hyundai_power": "Potencia de carga del segundo vehículo",
+          "weather": "Tiempo meteorológico",
+          "tv_host": "Dirección IP del televisor",
+          "vehicle1_name": "Nombre del primer vehículo",
+          "vehicle1_letter": "Monograma del primer vehículo (1–2 letras)",
+          "vehicle2_name": "Nombre del segundo vehículo",
+          "vehicle2_letter": "Monograma del segundo vehículo (1–2 letras)",
+          "location_name": "Texto bajo el tiempo (p. ej., el nombre de tu pueblo)",
+          "show_update_time": "Mostrar la hora de actualización bajo la fecha",
+          "update_interval": "Actualizar la imagen automáticamente"
+        },
+        "data_description": {
+          "update_interval": "Elige «Manual» si solo actualizas la imagen con tu propia automatización (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Emparejar con el televisor",
+        "description": "Enciende el televisor y pulsa «Enviar». Si el televisor ({host}) lo pide, elige «Permitir» en un plazo de 30 segundos."
+      }
+    },
+    "error": {
+      "missing_background": "El archivo del fondo limpio no existe",
+      "same_path": "La imagen generada no debe sobrescribir el fondo",
+      "pairing_failed": "El televisor no abrió la conexión. Comprueba la dirección IP y que el televisor esté encendido. Si el televisor lo pide, elige «Permitir».",
+      "missing_host": "Introduce la dirección IP del televisor"
+    },
+    "abort": {
+      "already_configured": "Ya está configurado"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Frame Energy Art",
+        "description": "Obra de arte en directo para Samsung The Frame. Elige tus sensores, los nombres que se muestran en la imagen y la dirección IP del televisor.",
+        "data": {
+          "background_path": "Tu propia imagen de fondo (déjalo vacío para usar la pintura integrada)",
+          "output_path": "Ruta del JPG generado",
+          "solar": "Potencia solar",
+          "home": "Consumo de la casa",
+          "battery": "Porcentaje de la batería doméstica",
+          "battery_charge": "Potencia de carga de la batería",
+          "battery_discharge": "Potencia de descarga de la batería",
+          "tesla": "Batería del primer vehículo en % (déjalo vacío si no tienes coche)",
+          "tesla_power": "Potencia de carga del primer vehículo",
+          "hyundai": "Batería del segundo vehículo en % (déjalo vacío si solo tienes un coche)",
+          "hyundai_power": "Potencia de carga del segundo vehículo",
+          "weather": "Tiempo meteorológico",
+          "tv_host": "Dirección IP del televisor",
+          "vehicle1_name": "Nombre del primer vehículo",
+          "vehicle1_letter": "Monograma del primer vehículo (1–2 letras)",
+          "vehicle2_name": "Nombre del segundo vehículo",
+          "vehicle2_letter": "Monograma del segundo vehículo (1–2 letras)",
+          "location_name": "Texto bajo el tiempo (p. ej., el nombre de tu pueblo)",
+          "show_update_time": "Mostrar la hora de actualización bajo la fecha",
+          "update_interval": "Actualizar la imagen automáticamente"
+        },
+        "data_description": {
+          "update_interval": "Elige «Manual» si solo actualizas la imagen con tu propia automatización (frame_energy.render)."
+        }
+      },
+      "pair": {
+        "title": "Emparejar con el televisor",
+        "description": "Enciende el televisor y pulsa «Enviar». Si el televisor ({host}) lo pide, elige «Permitir» en un plazo de 30 segundos."
+      }
+    },
+    "error": {
+      "missing_background": "El archivo del fondo limpio no existe",
+      "same_path": "La imagen generada no debe sobrescribir el fondo",
+      "pairing_failed": "El televisor no abrió la conexión. Comprueba la dirección IP y que el televisor esté encendido. Si el televisor lo pide, elige «Permitir».",
+      "missing_host": "Introduce la dirección IP del televisor"
+    }
+  },
+  "selector": {
+    "update_interval": {
+      "options": {
+        "5": "Cada 5 minutos",
+        "10": "Cada 10 minutos",
+        "15": "Cada 15 minutos (recomendado)",
+        "30": "Cada 30 minutos",
+        "60": "Cada hora",
+        "manual": "Manual (solo con tu propia automatización)"
+      }
+    }
+  }
+}

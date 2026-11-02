@@ -3,6 +3,19 @@
 All notable changes to Frame Energy Art. Versions 1.1.0 to 1.2.0 were released
 on 11 and 12 October 2026.
 
+## 1.4.1
+
+### New
+
+- Translations of the setup and settings screens: Ukrainian, Estonian,
+  German, French, Spanish and Polish. They are AI-assisted. If a text sounds
+  wrong, please open an issue.
+
+### Changed
+
+- README: Home Assistant 2026.11 and newer has HACS built in as the
+  **Marketplace**. The install section now says so.
+
 ## 1.4.0
 
 ### New

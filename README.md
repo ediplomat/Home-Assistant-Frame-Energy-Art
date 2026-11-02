@@ -66,6 +66,10 @@ year, even if it works.
 1. Open **HACS** and search for **Frame Energy Art**.
 2. Open it, press **Download** and restart Home Assistant.
 
+Home Assistant 2026.11 and newer has HACS built in, under the name
+**Marketplace** (Settings → Marketplace). It is the same catalog: search for
+**Frame Energy Art** there.
+
 ### HACS (custom repository, if search does not find it)
 
 1. HACS → three dots → **Custom repositories**.
@@ -91,8 +95,10 @@ or **Samba share** add-on, and enter that path in the setup.
 
 ## Setup
 
-The setup and settings screens are available in English and Russian. The
-sensor and service names stay in English.
+The setup and settings screens are available in English, Russian, Ukrainian,
+Estonian, German, French, Spanish and Polish. The translations are
+AI-assisted: if a text sounds wrong in your language, please open an issue.
+The sensor and service names stay in English.
 
 0. **On the TV first:** open **Settings → General → External Device Manager →
    Device Connection Manager** and set **Access Notification** to
